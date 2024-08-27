@@ -235,14 +235,11 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="success"
+												endIcon={<CheckCircle />
+												}
 
 											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+												Transaction {state.status!}
 											</Button>
 										</>
 									),
@@ -261,13 +258,12 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="error"
-											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
+												endIcon={
 													<CheckCircle />
-												</Icon>
+												}
+											>
+												Transaction{state.status!}
+
 											</Button>
 										</>
 									),
@@ -278,7 +274,7 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 				}[state.type]
 			}
 			{state.error && <Typography color="error">{state.error}</Typography>}
-		</Stack>
+		</Stack >
 	);
 }
 
@@ -509,11 +505,12 @@ export function GenericInvoke<TReq, TReqUi, TRes, TResUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="error"
-											>
-												<Typography pr={1}>Ok</Typography>
-												<Icon sx={{ ml: "1em" }}>
+												endIcon={
 													<CheckCircle />
-												</Icon>
+												}
+											>
+												Ok
+
 											</Button>
 										</>
 									),
@@ -719,13 +716,10 @@ export function GenericInit<TReq, TReqUi>(
 								{
 									success: (
 										<>
-											<Button variant="contained" onClick={resetState}>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ alignItems: 'center', justifyItems: 'center' }} sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+											<Button variant="contained" onClick={resetState} endIcon={<CheckCircle />
+											}>
+												Transaction {state.status!}
+
 											</Button>
 										</>
 									),
