@@ -1,4 +1,3 @@
-use concordium_rwa_utils::clients::contract_client::IContractState;
 use concordium_std::{
     ContractAddress, DeserialWithState, Serial, StateApi, StateBuilder, StateSet,
 };
@@ -7,7 +6,7 @@ use super::types::AttributeValue;
 
 #[derive(Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
-pub struct State<S = StateApi> {
+pub struct State<S=StateApi> {
     allowed_nationalities: StateSet<AttributeValue, S>,
     identity_registry:     ContractAddress,
 }
@@ -36,5 +35,3 @@ impl State<StateApi> {
         self.allowed_nationalities.contains(&value)
     }
 }
-
-impl IContractState for State<StateApi> {}

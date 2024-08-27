@@ -1,18 +1,16 @@
-use super::{
-    error::Error,
-    state::State,
-    types::{ContractResult, Event},
-};
 use concordium_cis2::*;
-use concordium_rwa_utils::holders_state::IHoldersState;
+use concordium_rwa_utils::state_implementations::holders_state::IHoldersState;
 use concordium_std::*;
+
+use super::error::Error;
+use super::state::State;
+use super::types::{ContractResult, Event};
 
 /// Updates the operator status for the sender.
 ///
 /// # Returns
 ///
-/// Returns `ContractResult<()>` indicating whether the operation was
-/// successful.
+/// Returns `ContractResult<()>` indicating whether the operation was successful.
 ///
 /// # Errors
 ///
@@ -30,35 +28,26 @@ pub fn update_operator(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    let UpdateOperatorParams {
-        0: updates,
-    }: UpdateOperatorParams = ctx.parameter_cursor().get()?;
+    let UpdateOperatorParams { 0: updates }: UpdateOperatorParams = ctx.parameter_cursor().get()?;
     let (state, state_builder) = host.state_and_builder();
     let sender = ctx.sender();
     ensure!(sender.is_account(), Error::InvalidAddress);
-
-    for UpdateOperator {
-        operator,
-        update,
-    } in updates
-    {
+    for UpdateOperator { operator, update } in updates {
         match update {
             OperatorUpdate::Add => state.add_operator(sender, operator, state_builder),
             OperatorUpdate::Remove => state.remove_operator(sender, &operator),
         }
-
-        logger.log(&Event::Cis2(Cis2Event::UpdateOperator(UpdateOperatorEvent {
-            operator,
-            update,
-            owner: sender,
-        })))?;
+        logger.log(&Event::Cis2(Cis2Event::UpdateOperator(
+            UpdateOperatorEvent {
+                operator,
+                update,
+                owner: sender,
+            },
+        )))?;
     }
-
     Ok(())
 }
 
-// Returns true if the given address is an operator for the given owner.
-///
 /// # Returns
 ///
 /// Returns `ContractResult<OperatorOfQueryResponse>` containing a boolean
@@ -78,11 +67,11 @@ pub fn operator_of(
     ctx: &ReceiveContext,
     host: &Host<State>,
 ) -> ContractResult<OperatorOfQueryResponse> {
-    let OperatorOfQueryParams {
-        queries,
-    }: OperatorOfQueryParams = ctx.parameter_cursor().get()?;
+    let OperatorOfQueryParams { queries }: OperatorOfQueryParams = ctx.parameter_cursor().get()?;
     let state = host.state();
-    let res: Vec<bool> = queries.iter().map(|q| state.is_operator(&q.owner, &q.address)).collect();
-
+    let res: Vec<bool> = queries
+        .iter()
+        .map(|q| state.is_operator(&q.owner, &q.address))
+        .collect();
     Ok(OperatorOfQueryResponse(res))
 }

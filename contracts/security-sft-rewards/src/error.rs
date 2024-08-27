@@ -1,11 +1,14 @@
-use concordium_rwa_utils::{
-    clients::contract_client::ContractClientError,
-    holders_security_state::HolderSecurityStateError, holders_state::HolderStateError,
-    tokens_security_state::TokenSecurityError, tokens_state::TokenStateError,
-};
-use concordium_std::{
-    num::NonZeroI32, CallContractError, LogError, ParseError, Reject, SchemaType,
-};
+use concordium_protocols::concordium_cis2_security::identity_registry_client::IdentityRegistryClientError;
+use concordium_rwa_utils::conversions::exchange_rate::ExchangeError;
+use concordium_rwa_utils::state_implementations::cis2_security_state::Cis2SecurityStateError;
+use concordium_rwa_utils::state_implementations::cis2_state::Cis2StateError;
+use concordium_rwa_utils::state_implementations::holders_security_state::HolderSecurityStateError;
+use concordium_rwa_utils::state_implementations::holders_state::HolderStateError;
+use concordium_rwa_utils::state_implementations::rewards_state::RewardsStateError;
+use concordium_rwa_utils::state_implementations::tokens_security_state::TokenSecurityError;
+use concordium_rwa_utils::state_implementations::tokens_state::TokenStateError;
+use concordium_std::num::NonZeroI32;
+use concordium_std::{CallContractError, LogError, ParseError, Reject, SchemaType};
 
 #[derive(SchemaType)]
 pub enum Error {
@@ -15,8 +18,7 @@ pub enum Error {
     LogError,
     /// Triggered when the receiver of the token is not verified.
     InvalidTokenId,
-    /// The balance of the token owner is insufficient for the transfer (Error
-    /// code: -42000002).
+    /// The balance of the token owner is insufficient for the transfer (Error code: -42000002).
     InsufficientFunds,
     /// Sender is unauthorized to call this function (Error code: -42000003).
     Unauthorized,
@@ -42,8 +44,7 @@ pub enum Error {
     Cis2WithdrawError,
     InsufficientDeposits,
     NotDeposited,
-    InsufficientFractionalized,
-    InvalidFractionsRate,
+    InvalidRewardRate,
 }
 
 impl Error {
@@ -70,13 +71,11 @@ impl Error {
             Error::Cis2WithdrawError => -14,
             Error::InsufficientDeposits => -15,
             Error::NotDeposited => -16,
-            Error::InsufficientFractionalized => -17,
-            Error::InvalidFractionsRate => -18,
+            Error::InvalidRewardRate => -17,
         })
         .unwrap()
     }
 }
-
 impl From<Error> for Reject {
     fn from(err: Error) -> Self {
         Reject {
@@ -85,46 +84,76 @@ impl From<Error> for Reject {
         }
     }
 }
-
 impl From<ParseError> for Error {
     fn from(_: ParseError) -> Self { Error::ParseError }
 }
-
 impl From<LogError> for Error {
     fn from(_: LogError) -> Self { Error::LogError }
 }
-
 impl From<TokenStateError> for Error {
     fn from(_: TokenStateError) -> Self { Error::InvalidTokenId }
 }
-
 impl From<HolderStateError> for Error {
     fn from(_: HolderStateError) -> Self { Error::InsufficientFunds }
 }
-
 impl From<TokenSecurityError> for Error {
     fn from(value: TokenSecurityError) -> Self {
         match value {
             TokenSecurityError::PausedToken => Error::PausedToken,
+            TokenSecurityError::InvalidTokenId => Error::InvalidTokenId,
         }
     }
 }
-
 impl From<HolderSecurityStateError> for Error {
     fn from(e: HolderSecurityStateError) -> Self {
         match e {
             HolderSecurityStateError::AmountTooLarge => Error::InsufficientFunds,
-            HolderSecurityStateError::AmountOverflow => Error::InvalidAmount,
             HolderSecurityStateError::AddressAlreadyRecovered => Error::InvalidAddress,
             HolderSecurityStateError::InvalidRecoveryAddress => Error::InvalidAddress,
         }
     }
 }
-
-impl<T> From<ContractClientError<T>> for Error {
-    fn from(_: ContractClientError<T>) -> Self { Error::CallContractError }
+impl From<IdentityRegistryClientError> for Error {
+    fn from(_: IdentityRegistryClientError) -> Self { Error::CallContractError }
 }
-
 impl<T> From<CallContractError<T>> for Error {
     fn from(_: CallContractError<T>) -> Self { Error::CallContractError }
+}
+impl From<Cis2StateError> for Error {
+    fn from(e: Cis2StateError) -> Self {
+        match e {
+            Cis2StateError::InvalidTokenId => Error::InvalidTokenId,
+            Cis2StateError::InsufficientFunds => Error::InsufficientFunds,
+            Cis2StateError::InvalidAmount => Error::InvalidAmount,
+        }
+    }
+}
+
+impl From<Cis2SecurityStateError> for Error {
+    fn from(value: Cis2SecurityStateError) -> Self {
+        match value {
+            Cis2SecurityStateError::InvalidTokenId => Error::InvalidTokenId,
+            Cis2SecurityStateError::InsufficientFunds => Error::InsufficientFunds,
+            Cis2SecurityStateError::InvalidAmount => Error::InvalidAmount,
+            Cis2SecurityStateError::InvalidAddress => Error::InvalidAddress,
+            Cis2SecurityStateError::PausedToken => Error::PausedToken,
+        }
+    }
+}
+
+impl From<RewardsStateError> for Error {
+    fn from(value: RewardsStateError) -> Self {
+        match value {
+            RewardsStateError::InsufficientFunds => Error::InsufficientFunds,
+            RewardsStateError::InvalidAmount => Error::InvalidAmount,
+            RewardsStateError::InvalidTokenId => Error::InvalidTokenId,
+        }
+    }
+}
+impl From<ExchangeError> for Error {
+    fn from(value: ExchangeError) -> Self {
+        match value {
+            ExchangeError::InvalidRate => Error::InvalidRewardRate,
+        }
+    }
 }

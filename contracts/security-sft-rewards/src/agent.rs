@@ -1,11 +1,10 @@
-use super::{
-    error::Error,
-    state::State,
-    types::{Agent, AgentRole, ContractResult, Event},
-};
-use concordium_rwa_utils::{agent_with_roles_state::IAgentWithRolesState, concordium_cis2_security::AgentUpdatedEvent};
+use concordium_protocols::concordium_cis2_security::AgentUpdatedEvent;
+use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
 use concordium_std::*;
 
+use super::error::Error;
+use super::state::State;
+use super::types::{Agent, AgentRole, ContractResult, Event};
 /// Returns true if the given address is an agent.
 ///
 /// # Returns
@@ -16,18 +15,18 @@ use concordium_std::*;
     name = "isAgent",
     parameter = "Agent",
     return_value = "bool",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn is_agent(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool> {
     let agent: Agent = ctx.parameter_cursor().get()?;
-    Ok(host.state().is_agent(&agent.address, agent.roles.iter().collect()))
+    Ok(host.state().is_agent(&agent.address, agent.roles))
 }
 
 #[receive(
     contract = "security_sft_rewards",
     name = "agents",
     return_value = "Vec<Agent>",
-    error = "super::error::Error"
+    error = "Error"
 )]
 /// Returns the list of agents.
 pub fn agents(_ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<Vec<Agent>> {
@@ -50,7 +49,7 @@ pub fn agents(_ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<Vec<A
     mutable,
     enable_logger,
     parameter = "Agent",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn add_agent(
     ctx: &ReceiveContext,
@@ -62,11 +61,14 @@ pub fn add_agent(
     ensure!(
         state.is_agent(
             &ctx.sender(),
-            params.roles.iter().chain([AgentRole::AddAgent].iter()).collect::<Vec<_>>(),
+            [params.roles.as_slice(), &[AgentRole::AddAgent]].concat(),
         ),
         Error::Unauthorized
     );
-    ensure!(state.add_agent(params.to_owned(), state_builder), Error::AgentAlreadyExists);
+    ensure!(
+        state.add_agent(params.to_owned(), state_builder),
+        Error::AgentAlreadyExists
+    );
     logger.log(&Event::AgentAdded(AgentUpdatedEvent {
         agent: params.address,
         roles: params.roles,
@@ -79,8 +81,7 @@ pub fn add_agent(
 ///
 /// # Returns
 ///
-/// Returns `ContractResult<()>` indicating whether the operation was
-/// successful.
+/// Returns `ContractResult<()>` indicating whether the operation was successful.
 ///
 /// # Errors
 ///
@@ -91,14 +92,17 @@ pub fn add_agent(
     mutable,
     enable_logger,
     parameter = "Address",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn remove_agent(
     ctx: &ReceiveContext,
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(ctx.sender().matches_account(&ctx.owner()), Error::Unauthorized);
+    ensure!(
+        ctx.sender().matches_account(&ctx.owner()),
+        Error::Unauthorized
+    );
     let address: Address = ctx.parameter_cursor().get()?;
     let agent: Option<Agent> = host.state_mut().remove_agent(&address);
     match agent {

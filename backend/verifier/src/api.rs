@@ -1,29 +1,28 @@
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
-use concordium_rust_sdk::{
-    common::to_bytes,
-    id::types::IpIdentity,
-    smart_contracts::common::{AccountAddress, AccountAddressParseError},
-    types::{smart_contracts::InstanceInfo, Address, ContractAddress, Energy, WalletAccount},
-    v2::{BlockIdentifier, QueryError},
-    web3id::did::Network,
-};
-use concordium_rwa_backend_shared::{api::ApiContractAddress, db::DbPool};
+use concordium_rust_sdk::common::to_bytes;
+use concordium_rust_sdk::id::types::IpIdentity;
+use concordium_rust_sdk::smart_contracts::common::{AccountAddress, AccountAddressParseError};
+use concordium_rust_sdk::types::smart_contracts::InstanceInfo;
+use concordium_rust_sdk::types::{Address, ContractAddress, Energy, WalletAccount};
+use concordium_rust_sdk::v2::{BlockIdentifier, QueryError};
+use concordium_rust_sdk::web3id::did::Network;
+use concordium_rwa_backend_shared::api::ApiContractAddress;
+use concordium_rwa_backend_shared::db::DbPool;
 use hex::encode;
 use log::debug;
 use poem::web::Data;
-use poem_openapi::{payload::Json, ApiResponse, Object, OpenApi, OpenApiService};
+use poem_openapi::payload::Json;
+use poem_openapi::{ApiResponse, Object, OpenApi, OpenApiService};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use crate::{
-    db,
-    identity_registry_client::{self, IdentityRegistryClient},
-    web3_id_utils::{
-        verify_presentation, CredStatement, GlobalContext, IdStatement, Presentation,
-        VerifyPresentationError,
-    },
+use crate::db;
+use crate::identity_registry_client::{self, IdentityRegistryClient};
+use crate::web3_id_utils::{
+    verify_presentation, CredStatement, GlobalContext, IdStatement, Presentation,
+    VerifyPresentationError,
 };
 
 #[derive(Debug, ApiResponse)]
@@ -202,7 +201,10 @@ impl Api {
             challenge.challenge,
         )
         .await?;
-        debug!("Revealed Id Attributes: {:?}", verification_response.revealed_attributes);
+        debug!(
+            "Revealed Id Attributes: {:?}",
+            verification_response.revealed_attributes
+        );
         debug!("Credentials: {:?}", verification_response.credentials);
 
         // Determine the identity address based on the contract and account
@@ -213,18 +215,15 @@ impl Api {
                     .get_instance_info(contract, BlockIdentifier::LastFinal)
                     .await?;
                 let contract_owner = match contract_info.response {
-                    InstanceInfo::V0 {
-                        owner,
-                        ..
-                    } => owner,
-                    InstanceInfo::V1 {
-                        owner,
-                        ..
-                    } => owner,
+                    InstanceInfo::V0 { owner, .. } => owner,
+                    InstanceInfo::V1 { owner, .. } => owner,
                 };
 
                 if contract_owner != account {
-                    debug!("Contract owner: {} does not match", contract_owner.to_string());
+                    debug!(
+                        "Contract owner: {} does not match",
+                        contract_owner.to_string()
+                    );
                     // Enhancement: Return a more specific error. Include debug message as error
                     // message
                     return Err(VerifierApiError::BadRequest);
@@ -238,7 +237,12 @@ impl Api {
 
         // Register the identity using the IdentityRegistryClient
         let txn = IdentityRegistryClient::new(concordium_client, *identity_registry)
-            .register_identity(agent_wallet, identity_address, verification_response, *max_energy)
+            .register_identity(
+                agent_wallet,
+                identity_address,
+                verification_response,
+                *max_energy,
+            )
             .await?;
         debug!("Register Identity Transaction Hash: {}", txn.to_string());
         db::update_challenge_add_txn_hash(&mut conn, challenge.id, txn).await?;

@@ -1,13 +1,14 @@
-use crate::schema::{self, listener_config, listener_contracts};
 use bigdecimal::BigDecimal;
-use concordium_rust_sdk::{
-    base::{hashes::ModuleReference, smart_contracts::OwnedContractName},
-    types::AbsoluteBlockHeight,
-    v2::FinalizedBlockInfo,
-};
+use concordium_rust_sdk::base::hashes::ModuleReference;
+use concordium_rust_sdk::base::smart_contracts::OwnedContractName;
+use concordium_rust_sdk::types::AbsoluteBlockHeight;
+use concordium_rust_sdk::v2::FinalizedBlockInfo;
 use concordium_rwa_backend_shared::db::DbConn;
-use diesel::{dsl::*, prelude::*};
+use diesel::dsl::*;
+use diesel::prelude::*;
 use num_traits::ToPrimitive;
+
+use crate::schema::{self, listener_config, listener_contracts};
 
 #[derive(Selectable, Queryable, Identifiable)]
 #[diesel(table_name = schema::listener_config)]
@@ -27,7 +28,9 @@ pub struct ListenerConfigInsert {
 }
 
 /// Retrieves the last processed block from the database.
-pub fn get_last_processed_block(conn: &mut DbConn) -> anyhow::Result<Option<AbsoluteBlockHeight>> {
+pub fn get_last_processed_block(
+    conn: &mut DbConn,
+) -> Result<Option<AbsoluteBlockHeight>, diesel::result::Error> {
     let config = listener_config::table
         .order(listener_config::last_block_height.desc())
         .limit(1)
@@ -35,7 +38,9 @@ pub fn get_last_processed_block(conn: &mut DbConn) -> anyhow::Result<Option<Abso
         .first(conn)
         .optional()?
         .map(|block_height: BigDecimal| AbsoluteBlockHeight {
-            height: block_height.to_u64().expect("Block height should convert to u64"),
+            height: block_height
+                .to_u64()
+                .expect("Block height should convert to u64"),
         });
 
     Ok(config)
@@ -45,7 +50,7 @@ pub fn get_last_processed_block(conn: &mut DbConn) -> anyhow::Result<Option<Abso
 pub fn update_last_processed_block(
     conn: &mut DbConn,
     block: &FinalizedBlockInfo,
-) -> anyhow::Result<i32> {
+) -> Result<i32, diesel::result::Error> {
     let created_id: i32 = insert_into(listener_config::table)
         .values(ListenerConfigInsert {
             last_block_hash:   block.block_hash.bytes.to_vec(),
@@ -74,7 +79,7 @@ pub fn add_contract(
     address: &concordium_rust_sdk::types::ContractAddress,
     origin_ref: &ModuleReference,
     init_name: &OwnedContractName,
-) -> anyhow::Result<()> {
+) -> Result<(), diesel::result::Error> {
     insert_into(listener_contracts::table)
         .values(ListenerContract {
             index:         address.index.into(),
@@ -91,10 +96,13 @@ pub fn add_contract(
 pub fn find_contract(
     conn: &mut DbConn,
     contract_address: &concordium_rust_sdk::types::ContractAddress,
-) -> anyhow::Result<Option<(ModuleReference, OwnedContractName)>> {
+) -> Result<Option<(ModuleReference, OwnedContractName)>, diesel::result::Error> {
     let contract = listener_contracts::table
         .filter(listener_contracts::index.eq::<BigDecimal>(contract_address.index.into()))
-        .select((listener_contracts::module_ref, listener_contracts::contract_name))
+        .select((
+            listener_contracts::module_ref,
+            listener_contracts::contract_name,
+        ))
         .get_result(conn)
         .optional()?
         .map(|c: (Vec<u8>, String)| (to_module_ref(c.0), OwnedContractName::new_unchecked(c.1)));
@@ -103,5 +111,9 @@ pub fn find_contract(
 }
 
 fn to_module_ref(vec: Vec<u8>) -> ModuleReference {
-    ModuleReference::new(vec.as_slice().try_into().expect("Should convert vec to module ref"))
+    ModuleReference::new(
+        vec.as_slice()
+            .try_into()
+            .expect("Should convert vec to module ref"),
+    )
 }

@@ -1,14 +1,13 @@
-use super::db;
-use concordium_rust_sdk::{
-    cis2,
-    types::{Address, ContractAddress},
-};
-use concordium_rwa_backend_shared::{
-    api::{ApiAddress, ApiResult, PagedResponse, PAGE_SIZE},
-    db::DbPool,
-};
+use concordium_rust_sdk::cis2;
+use concordium_rust_sdk::types::{Address, ContractAddress};
+use concordium_rwa_backend_shared::api::{ApiAddress, ApiResult, PagedResponse, PAGE_SIZE};
+use concordium_rwa_backend_shared::db::DbPool;
 use poem::web::Data;
-use poem_openapi::{param::Path, payload::Json, Object, OpenApi};
+use poem_openapi::param::Path;
+use poem_openapi::payload::Json;
+use poem_openapi::{Object, OpenApi};
+
+use super::db;
 
 #[derive(Object)]
 pub struct Token {
@@ -80,7 +79,10 @@ pub struct Cis2Api;
 
 #[OpenApi]
 impl Cis2Api {
-    #[oai(path = "/rwa-security-cis2/:index/:subindex/tokens/:page", method = "get")]
+    #[oai(
+        path = "/rwa-security-cis2/:index/:subindex/tokens/:page",
+        method = "get"
+    )]
     pub async fn tokens(
         &self,
         Data(pool): Data<&DbPool>,
@@ -88,10 +90,7 @@ impl Cis2Api {
         Path(subindex): Path<u64>,
         Path(page): Path<i64>,
     ) -> ApiResult<PagedResponse<Token>> {
-        let cis2_address = ContractAddress {
-            index,
-            subindex,
-        };
+        let cis2_address = ContractAddress { index, subindex };
         let mut conn = pool.get()?;
         let (tokens, page_count) =
             db::list_tokens_for_contract(&mut conn, &cis2_address, PAGE_SIZE, page)?;
@@ -105,7 +104,10 @@ impl Cis2Api {
         ApiResult::Ok(Json(res))
     }
 
-    #[oai(path = "/rwa-security-cis2/:index/:subindex/holders/:address/:page", method = "get")]
+    #[oai(
+        path = "/rwa-security-cis2/:index/:subindex/holders/:address/:page",
+        method = "get"
+    )]
     pub async fn holders(
         self,
         Data(pool): Data<&DbPool>,
@@ -114,10 +116,7 @@ impl Cis2Api {
         Path(address): Path<String>,
         Path(page): Path<i64>,
     ) -> ApiResult<PagedResponse<TokenHolder>> {
-        let cis2_address = ContractAddress {
-            index,
-            subindex,
-        };
+        let cis2_address = ContractAddress { index, subindex };
         let holder_address: Address = address.parse()?;
         let mut conn = pool.get()?;
 
@@ -133,7 +132,10 @@ impl Cis2Api {
         ApiResult::Ok(Json(res))
     }
 
-    #[oai(path = "/rwa-security-cis2/:index/:subindex/holdersOf/:token_id/:page", method = "get")]
+    #[oai(
+        path = "/rwa-security-cis2/:index/:subindex/holdersOf/:token_id/:page",
+        method = "get"
+    )]
     pub async fn holders_of(
         &self,
         Data(pool): Data<&DbPool>,
@@ -142,10 +144,7 @@ impl Cis2Api {
         Path(token_id): Path<String>,
         Path(page): Path<i64>,
     ) -> ApiResult<PagedResponse<TokenHolder>> {
-        let cis2_address = ContractAddress {
-            index,
-            subindex,
-        };
+        let cis2_address = ContractAddress { index, subindex };
         let token_id: cis2::TokenId = token_id.parse()?;
         let mut conn = pool.get()?;
         let (tokens, page_count) =
@@ -160,7 +159,10 @@ impl Cis2Api {
         ApiResult::Ok(Json(res))
     }
 
-    #[oai(path = "/rwa-security-cis2/:index/:subindex/deposited/:owner/:page", method = "get")]
+    #[oai(
+        path = "/rwa-security-cis2/:index/:subindex/deposited/:owner/:page",
+        method = "get"
+    )]
     pub async fn list_deposited(
         &self,
         Data(pool): Data<&DbPool>,
@@ -169,10 +171,7 @@ impl Cis2Api {
         Path(owner): Path<String>,
         Path(page): Path<i64>,
     ) -> ApiResult<PagedResponse<Cis2Deposit>> {
-        let cis2_address = ContractAddress {
-            index,
-            subindex,
-        };
+        let cis2_address = ContractAddress { index, subindex };
         let owner: Address = owner.parse()?;
         let mut conn = pool.get()?;
         let (tokens, page_count) =
@@ -187,5 +186,5 @@ impl Cis2Api {
         ApiResult::Ok(Json(res))
     }
 
-    //todo copy contract functions for the api, ex balanceOf
+    // todo copy contract functions for the api, ex balanceOf
 }

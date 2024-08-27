@@ -1,12 +1,12 @@
-use super::{
-    error::*,
-    state::State,
-    types::{AgentRole, ContractResult, RecoverParam, Event},
-};
-use concordium_rwa_utils::{
-    agent_with_roles_state::IAgentWithRolesState, clients::identity_registry_client::{IdentityRegistryClient, IdentityRegistryContract}, concordium_cis2_security, holders_security_state::IHoldersSecurityState
-};
+use concordium_protocols::concordium_cis2_security::{identity_registry_client, RecoverEvent};
+use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
+use concordium_rwa_utils::state_implementations::cis2_security_state::ICis2SecurityState;
+use concordium_rwa_utils::state_implementations::holders_security_state::IHoldersSecurityState;
 use concordium_std::*;
+
+use super::error::*;
+use super::state::State;
+use super::types::{AgentRole, ContractResult, Event, RecoverParam};
 
 #[receive(
     contract = "security_sft_rewards",
@@ -14,7 +14,7 @@ use concordium_std::*;
     mutable,
     enable_logger,
     parameter = "RecoverParam",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn recover(
     ctx: &ReceiveContext,
@@ -25,11 +25,15 @@ pub fn recover(
         lost_account,
         new_account,
     }: RecoverParam = ctx.parameter_cursor().get()?;
-    let state = host.state_mut();
-    ensure!(state.is_agent(&ctx.sender(), vec![&AgentRole::HolderRecovery]), Error::Unauthorized);
+    let state = host.state();
     ensure!(
-        IdentityRegistryContract(state.identity_registry()).is_same(
+        state.is_agent(&ctx.sender(), vec![AgentRole::HolderRecovery]),
+        Error::Unauthorized
+    );
+    ensure!(
+        identity_registry_client::is_same(
             host,
+            state.identity_registry(),
             &lost_account,
             &new_account
         )?,
@@ -37,7 +41,7 @@ pub fn recover(
     );
 
     host.state_mut().recover(lost_account, new_account)?;
-    logger.log(&Event::Recovered(concordium_cis2_security::RecoverEvent {
+    logger.log(&Event::Recovered(RecoverEvent {
         lost_account,
         new_account,
     }))?;
@@ -49,7 +53,7 @@ pub fn recover(
     contract = "security_sft_rewards",
     name = "recoveryAddress",
     parameter = "Address",
-    error = "super::error::Error",
+    error = "Error",
     return_value = "Option<Address>"
 )]
 pub fn recovery_address(

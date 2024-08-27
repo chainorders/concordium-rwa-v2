@@ -1,14 +1,15 @@
-use super::{
-    error::Error,
-    state::State,
-    types::{Agent, AgentRole, ContractResult, Event, InitParam},
+use concordium_cis2::{Cis2Event, TokenMetadataEvent};
+use concordium_protocols::concordium_cis2_security::{
+    AgentUpdatedEvent, ComplianceAdded, IdentityRegistryAdded,
 };
-use concordium_rwa_utils::{
-    agent_with_roles_state::IAgentWithRolesState, concordium_cis2_security,
-    holders_security_state::IHoldersSecurityState,
-};
+use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
+use concordium_rwa_utils::state_implementations::cis2_security_state::ICis2SecurityState;
+use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
 use concordium_std::*;
 
+use super::error::Error;
+use super::state::State;
+use super::types::{Agent, AgentRole, ContractResult, Event, InitParam};
 /// Initializes the contract with the given parameters.
 ///
 /// # Returns
@@ -31,6 +32,10 @@ pub fn init(
     logger: &mut Logger,
 ) -> InitResult<State> {
     let params: InitParam = ctx.parameter_cursor().get()?;
+    ensure!(
+        params.min_reward_token_id.gt(&params.tracked_token_id),
+        Error::InvalidTokenId.into()
+    );
     let owner = Address::Account(ctx.init_origin());
     let state = State::new(
         params.identity_registry,
@@ -42,15 +47,28 @@ pub fn init(
             roles:   AgentRole::owner_roles(),
         }],
         params.metadata_url.into(),
+        params.blank_reward_metadata_url.into(),
+        params.tracked_token_id,
+        params.min_reward_token_id,
         state_builder,
     );
 
-    logger.log(&Event::IdentityRegistryAdded(concordium_cis2_security::IdentityRegistryAdded(
-        params.identity_registry,
+    logger.log(&Event::IdentityRegistryAdded(IdentityRegistryAdded(
+        state.identity_registry,
     )))?;
-    logger.log(&Event::ComplianceAdded(concordium_cis2_security::ComplianceAdded(
-        params.compliance,
-    )))?;
+    logger.log(&Event::ComplianceAdded(ComplianceAdded(state.compliance)))?;
+    for agent in state.list_agents().iter() {
+        logger.log(&Event::AgentAdded(AgentUpdatedEvent {
+            agent: agent.address,
+            roles: agent.roles.clone(),
+        }))?;
+    }
+    for token in state.tokens().iter() {
+        logger.log(&Event::Cis2(Cis2Event::TokenMetadata(TokenMetadataEvent {
+            metadata_url: token.1.metadata_url().clone(),
+            token_id:     *token.0,
+        })))?;
+    }
 
     Ok(state)
 }
@@ -59,8 +77,7 @@ pub fn init(
 ///
 /// # Returns
 ///
-/// Returns `ContractResult<ContractAddress>` containing the address of the
-/// identity registry contract.
+/// Returns `ContractResult<ContractAddress>` containing the address of the identity registry contract.
 #[receive(
     contract = "security_sft_rewards",
     name = "identityRegistry",
@@ -73,13 +90,22 @@ pub fn identity_registry(
     Ok(host.state().identity_registry())
 }
 
+/// Sets the address of the identity registry contract.
+///
+/// # Parameters
+///
+/// - `ContractAddress`: The address of the identity registry contract.
+///
+/// # Errors
+///
+/// Returns an `Error::Unauthorized` error if the caller is not authorized to set the identity registry.
 #[receive(
     contract = "security_sft_rewards",
     name = "setIdentityRegistry",
     mutable,
     enable_logger,
     parameter = "ContractAddress",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn set_identity_registry(
     ctx: &ReceiveContext,
@@ -88,17 +114,15 @@ pub fn set_identity_registry(
 ) -> ContractResult<()> {
     let identity_registry: ContractAddress = ctx.parameter_cursor().get()?;
     ensure!(
-        host.state().is_agent(&ctx.sender(), vec![&AgentRole::SetIdentityRegistry]),
+        host.state()
+            .is_agent(&ctx.sender(), vec![AgentRole::SetIdentityRegistry]),
         Error::Unauthorized
     );
 
-    // IdentityRegistryClient::new(identity_registry).is_identity_registry()?;
-
     host.state_mut().set_identity_registry(identity_registry);
-    logger.log(&Event::IdentityRegistryAdded(concordium_cis2_security::IdentityRegistryAdded(
+    logger.log(&Event::IdentityRegistryAdded(IdentityRegistryAdded(
         identity_registry,
     )))?;
-
     Ok(())
 }
 
@@ -106,8 +130,7 @@ pub fn set_identity_registry(
 ///
 /// # Returns
 ///
-/// Returns `ContractResult<ContractAddress>` containing the address of the
-/// compliance contract.
+/// Returns `ContractResult<ContractAddress>` containing the address of the compliance contract.
 #[receive(
     contract = "security_sft_rewards",
     name = "compliance",
@@ -117,13 +140,28 @@ pub fn compliance(_: &ReceiveContext, host: &Host<State>) -> ContractResult<Cont
     Ok(host.state().compliance())
 }
 
+/// Sets the compliance contract address.
+///
+/// This function allows authorized agents to set the compliance contract address for the security SFT rewards contract.
+///
+/// # Parameters
+///
+/// - `ContractAddress`: The address of the compliance contract.
+///
+/// # Errors
+///
+/// Returns an `Error::Unauthorized` error if the caller is not authorized to set the compliance contract.
+///
+/// # Returns
+///
+/// Returns `ContractResult<()>` indicating whether the operation was successful.
 #[receive(
     contract = "security_sft_rewards",
     name = "setCompliance",
     mutable,
     enable_logger,
     parameter = "ContractAddress",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn set_compliance(
     ctx: &ReceiveContext,
@@ -132,12 +170,13 @@ pub fn set_compliance(
 ) -> ContractResult<()> {
     let compliance: ContractAddress = ctx.parameter_cursor().get()?;
     ensure!(
-        host.state().is_agent(&ctx.sender(), vec![&AgentRole::SetCompliance]),
+        host.state()
+            .is_agent(&ctx.sender(), vec![AgentRole::SetCompliance]),
         Error::Unauthorized
     );
 
     host.state_mut().set_compliance(compliance);
-    logger.log(&Event::ComplianceAdded(concordium_cis2_security::ComplianceAdded(compliance)))?;
+    logger.log(&Event::ComplianceAdded(ComplianceAdded(compliance)))?;
 
     Ok(())
 }

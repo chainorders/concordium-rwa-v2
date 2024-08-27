@@ -1,16 +1,12 @@
 use concordium_cis2::{AdditionalData, Cis2Client, TokenAmountU64, Transfer};
-use concordium_rwa_utils::token_deposits_state::IDepositedTokensState;
-use concordium_std::{
-    ops::{Add, Sub},
-    *,
-};
+use concordium_rwa_utils::state_implementations::token_deposits_state::IDepositedTokensState;
+use concordium_std::ops::{Add, Sub};
+use concordium_std::*;
 
-use super::{
-    error::Error,
-    event::{Event, PaymentAmount, PaymentTokenUId, TokenDeListed, TokenExchanged},
-    state::State,
-    types::{ContractResult, ExchangeRate, *},
-};
+use super::error::Error;
+use super::event::{Event, PaymentAmount, PaymentTokenUId, TokenDeListed, TokenExchanged};
+use super::state::State;
+use super::types::{ContractResult, ExchangeRate, *};
 
 #[derive(Serialize, SchemaType)]
 pub struct ExchangeParams {
@@ -62,7 +58,14 @@ pub fn exchange(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let params: ExchangeParams = ctx.parameter_cursor().get()?;
-    exchange_internal(ctx.self_address(), ctx.owner(), params, amount_paid, host, logger)
+    exchange_internal(
+        ctx.self_address(),
+        ctx.owner(),
+        params,
+        amount_paid,
+        host,
+        logger,
+    )
 }
 
 #[receive(
@@ -107,7 +110,7 @@ pub fn exchange_internal(
     ensure!(state.is_listed(&buy_token_id), Error::NotListed);
     let amounts = calculate_amounts_internal(&buy_token_amount, &rate, &state.commission)?;
 
-    //settlement
+    // settlement
     Cis2Client::new(buy_token_id.token_id.contract)
         .transfer::<_, _, _, ()>(host, Transfer {
             token_id: buy_token_id.token_id.id.to_owned(),
@@ -118,7 +121,9 @@ pub fn exchange_internal(
         })
         .map_err(|_| Error::Cis2SettlementError)?;
 
-    let is_de_listed = host.state_mut().consume_listed(&buy_token_id, amounts.buy)?;
+    let is_de_listed = host
+        .state_mut()
+        .consume_listed(&buy_token_id, amounts.buy)?;
 
     match (amounts.pay_token.clone(), amounts.pay, amounts.commission) {
         (
@@ -132,7 +137,10 @@ pub fn exchange_internal(
             }
 
             let owner_amount = ccd_amount_paid.sub(pay_amount);
-            ensure!(owner_amount.ge(&commission_amount), Error::InsufficientPayment);
+            ensure!(
+                owner_amount.ge(&commission_amount),
+                Error::InsufficientPayment
+            );
 
             if owner_amount.gt(&Amount::zero()) {
                 host.invoke_transfer(&contract_owner, owner_amount)

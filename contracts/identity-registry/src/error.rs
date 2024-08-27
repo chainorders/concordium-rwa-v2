@@ -1,6 +1,5 @@
+use concordium_protocols::concordium_cis4::cis4_client::Cis4ClientError;
 use concordium_std::*;
-
-use concordium_rwa_utils::clients::cis4_client::Cis4ClientError;
 
 /// Represents the different types of errors that can occur in the contract.
 #[derive(Serial, Reject, SchemaType)]

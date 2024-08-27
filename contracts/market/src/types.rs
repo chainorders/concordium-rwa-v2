@@ -1,5 +1,5 @@
 use concordium_cis2::{TokenAmountU64, TokenIdVec};
-use concordium_rwa_utils::concordium_cis2_security;
+use concordium_protocols::concordium_cis2_security;
 use concordium_std::*;
 
 use super::error::Error;
@@ -11,7 +11,7 @@ pub type Cis2TokenAmount = TokenAmountU64;
 pub type TokenUId = concordium_cis2_security::TokenUId<TokenId>;
 pub type TokenOwnerUId = concordium_cis2_security::TokenOwnerUId<TokenId>;
 pub type ContractResult<T> = Result<T, Error>;
-pub use concordium_rwa_utils::cis2_conversions::Rate;
+pub use concordium_rwa_utils::conversions::exchange_rate::{ExchangeError, Rate};
 
 #[derive(Serialize, SchemaType, Clone)]
 pub enum ExchangeRate {

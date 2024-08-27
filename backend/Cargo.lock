@@ -810,6 +810,7 @@ version = "0.1.0"
 dependencies = [
  "concordium-cis2",
  "concordium-std",
+ "hex",
 ]
 
 [[package]]
@@ -850,6 +851,7 @@ name = "concordium-rwa-identity-registry"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
 ]
@@ -859,6 +861,7 @@ name = "concordium-rwa-market"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
 ]
@@ -870,7 +873,6 @@ dependencies = [
  "concordium-cis2",
  "concordium-protocols",
  "concordium-std",
- "hex",
 ]
 
 [[package]]
@@ -1002,12 +1004,12 @@ dependencies = [
 name = "concordium_rwa_events_listener"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "bigdecimal",
  "chrono",
  "clap",
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rust-sdk",
  "concordium-rwa-identity-registry",
  "concordium-rwa-market",
@@ -1028,6 +1030,7 @@ dependencies = [
  "security-sft-rewards",
  "serde_json",
  "sha2",
+ "thiserror",
  "tokio",
 ]
 
@@ -3223,6 +3226,7 @@ name = "security-sft-rewards"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
  "hex",

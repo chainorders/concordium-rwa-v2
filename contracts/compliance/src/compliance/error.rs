@@ -1,6 +1,5 @@
+use concordium_protocols::concordium_cis2_security::compliance_client::ComplianceError;
 use concordium_std::*;
-
-use concordium_rwa_utils::clients::contract_client::ContractClientError;
 
 #[derive(Serial, Reject, SchemaType)]
 pub enum Error {
@@ -17,15 +16,15 @@ impl From<ParseError> for Error {
     fn from(_: ParseError) -> Self { Error::ParseError }
 }
 
-impl From<ContractClientError<()>> for Error {
-    fn from(e: ContractClientError<()>) -> Self {
+impl From<ComplianceError> for Error {
+    fn from(e: ComplianceError) -> Self {
         match e {
-            ContractClientError::NoResponse => Error::InvalidModule,
-            ContractClientError::InvalidResponse => Error::InvalidModule,
-            ContractClientError::CallContractError(_) => Error::CallContractError,
+            ComplianceError::NoResponse => Error::InvalidModule,
+            ComplianceError::InvalidResponse => Error::InvalidModule,
+            ComplianceError::CallContractError(_) => Error::CallContractError,
             // these should not happen
-            ContractClientError::ParseResult => Error::ParseError,
-            ContractClientError::ParseResultError => Error::ParseError,
+            ComplianceError::ParseResult => Error::ParseError,
+            ComplianceError::ParseResultError => Error::ParseError,
         }
     }
 }

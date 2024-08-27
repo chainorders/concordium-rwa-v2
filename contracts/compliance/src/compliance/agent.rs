@@ -1,7 +1,10 @@
-use concordium_rwa_utils::agents_state::IsAgentsState;
+use concordium_rwa_utils::state_implementations::agents_state::IsAgentsState;
 use concordium_std::*;
 
-use super::{error::*, event::*, state::State, types::*};
+use super::error::*;
+use super::event::*;
+use super::state::State;
+use super::types::*;
 
 /// Returns true if the given address is an agent.
 ///
@@ -54,12 +57,13 @@ pub fn add_agent(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(ctx.sender().matches_account(&ctx.owner()), Error::Unauthorized);
+    ensure!(
+        ctx.sender().matches_account(&ctx.owner()),
+        Error::Unauthorized
+    );
     let agent: Address = ctx.parameter_cursor().get()?;
     ensure!(host.state_mut().add_agent(agent), Error::AgentAlreadyExists);
-    logger.log(&Event::AgentAdded(AgentUpdatedEvent {
-        agent,
-    }))?;
+    logger.log(&Event::AgentAdded(AgentUpdatedEvent { agent }))?;
 
     Ok(())
 }
@@ -87,12 +91,13 @@ pub fn remove_agent(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(ctx.sender().matches_account(&ctx.owner()), Error::Unauthorized);
+    ensure!(
+        ctx.sender().matches_account(&ctx.owner()),
+        Error::Unauthorized
+    );
     let agent: Address = ctx.parameter_cursor().get()?;
     ensure!(host.state_mut().remove_agent(&agent), Error::AgentNotFound);
-    logger.log(&Event::AgentRemoved(AgentUpdatedEvent {
-        agent,
-    }))?;
+    logger.log(&Event::AgentRemoved(AgentUpdatedEvent { agent }))?;
 
     Ok(())
 }

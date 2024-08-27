@@ -1,10 +1,10 @@
+use concordium_protocols::concordium_cis4::cis4_client;
 use concordium_std::*;
 
-use concordium_rwa_utils::clients::{
-    cis4_client::Cis4ContractAddress, contract_client::IContractClient,
-};
-
-use super::{error::*, event::*, state::State, types::*};
+use super::error::*;
+use super::event::*;
+use super::state::State;
+use super::types::*;
 
 /// Returns true if the given address is an issuer.
 ///
@@ -58,13 +58,20 @@ pub fn add_issuer(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(ctx.sender().matches_account(&ctx.owner()), Error::Unauthorized);
+    ensure!(
+        ctx.sender().matches_account(&ctx.owner()),
+        Error::Unauthorized
+    );
     let issuer: Issuer = ctx.parameter_cursor().get()?;
-    ensure!(Cis4ContractAddress(issuer).is_valid(host)?, Error::InvalidIssuer);
-    ensure!(host.state_mut().issuers.insert(issuer), Error::IssuerAlreadyExists);
-    logger.log(&Event::IssuerAdded(IssuerUpdatedEvent {
-        issuer,
-    }))?;
+    ensure!(
+        cis4_client::supports_cis4(host, issuer)?,
+        Error::InvalidIssuer
+    );
+    ensure!(
+        host.state_mut().issuers.insert(issuer),
+        Error::IssuerAlreadyExists
+    );
+    logger.log(&Event::IssuerAdded(IssuerUpdatedEvent { issuer }))?;
 
     Ok(())
 }
@@ -92,12 +99,16 @@ pub fn remove_issuer(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(ctx.sender().matches_account(&ctx.owner()), Error::Unauthorized);
+    ensure!(
+        ctx.sender().matches_account(&ctx.owner()),
+        Error::Unauthorized
+    );
     let issuer: ContractAddress = ctx.parameter_cursor().get()?;
-    ensure!(host.state_mut().issuers.remove(&issuer), Error::IssuerNotFound);
-    logger.log(&Event::IssuerRemoved(IssuerUpdatedEvent {
-        issuer,
-    }))?;
+    ensure!(
+        host.state_mut().issuers.remove(&issuer),
+        Error::IssuerNotFound
+    );
+    logger.log(&Event::IssuerRemoved(IssuerUpdatedEvent { issuer }))?;
 
     Ok(())
 }

@@ -1,10 +1,8 @@
+use concordium_protocols::concordium_cis4::{self, cis4_client};
 use concordium_std::*;
 
-use concordium_rwa_utils::clients::cis4_client::{
-    Cis4Client, Cis4ContractAddress, CredentialStatus,
-};
-
-use super::{state::State, types::ContractResult};
+use super::state::State;
+use super::types::ContractResult;
 
 /// Handles the `isVerified` contract call in the `rwa_identity_registry`
 /// contract.
@@ -42,13 +40,13 @@ pub fn is_verified(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<b
         let credential_id = identity.credential_id(&issuer);
         let credential_status = match credential_id {
             Some(credential_holder_id) => {
-                Cis4ContractAddress(issuer).credential_status(host, credential_holder_id)?
+                cis4_client::credential_status(host, issuer, credential_holder_id)?
             }
             None => return Ok(false),
         };
 
         // If the credential is not active, the identity is not verified.
-        if credential_status.ne(&CredentialStatus::Active) {
+        if credential_status.ne(&concordium_cis4::CredentialStatus::Active) {
             return Ok(false);
         }
     }

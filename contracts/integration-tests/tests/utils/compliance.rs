@@ -19,17 +19,22 @@ pub fn init(
     compliance_modules: Vec<ContractAddress>,
 ) -> ContractInitSuccess {
     chain
-        .contract_init(Signer::with_one_key(), sender.address, MAX_ENERGY, InitContractPayload {
-            amount:    Amount::zero(),
-            init_name: OwnedContractName::new_unchecked("init_rwa_compliance".to_string()),
-            mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
-            param:     OwnedParameter::from_serial(
-                &concordium_rwa_compliance::compliance::init::InitParams {
-                    modules: compliance_modules,
-                },
-            )
-            .unwrap(),
-        })
+        .contract_init(
+            Signer::with_one_key(),
+            sender.address,
+            MAX_ENERGY,
+            InitContractPayload {
+                amount:    Amount::zero(),
+                init_name: OwnedContractName::new_unchecked("init_rwa_compliance".to_string()),
+                mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
+                param:     OwnedParameter::from_serial(
+                    &concordium_rwa_compliance::compliance::init::InitParams {
+                        modules: compliance_modules,
+                    },
+                )
+                .unwrap(),
+            },
+        )
         .expect("init")
 }
 
@@ -55,9 +60,8 @@ pub mod nationalities_module {
     use concordium_rwa_compliance::compliance_modules::allowed_nationalities::init::InitParams;
     use concordium_smart_contract_testing::*;
 
-    use crate::utils::MAX_ENERGY;
-
     use super::MODULE_PATH;
+    use crate::utils::MAX_ENERGY;
 
     pub fn init(chain: &mut Chain, sender: &Account, param: &InitParams) -> ContractInitSuccess {
         chain

@@ -13,6 +13,7 @@ std = ["concordium-std/std", "concordium-cis2/std"]
 concordium-std = { version = "10.1.0", default-features = false }
 concordium-cis2 = { version = "6.1.0", default-features = false }
 concordium-rwa-utils = { path = "../utils" }
+concordium-protocols = { path = "../concordium-protocols" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]

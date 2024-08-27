@@ -1,6 +1,7 @@
 use concordium_std::*;
 
-use super::{state::State, types::ContractResult};
+use super::state::State;
+use super::types::ContractResult;
 
 /// Initializes the contract.
 #[init(

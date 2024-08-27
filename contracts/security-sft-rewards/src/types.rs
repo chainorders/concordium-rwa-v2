@@ -1,12 +1,14 @@
-use super::error::Error;
-use concordium_cis2::Receiver;
+use concordium_cis2::{Receiver, TokenIdU32};
+use concordium_protocols::concordium_cis2_ext;
+use concordium_protocols::concordium_cis2_security::{self, Cis2SecurityEvent};
 use concordium_std::{ContractAddress, SchemaType, Serialize};
 
-use concordium_rwa_utils::concordium_cis2_security::{self, AgentWithRoles};
+use super::error::Error;
+
 pub type ContractResult<R> = Result<R, Error>;
 pub type TokenAmount = concordium_cis2::TokenAmountU64;
-pub type TokenId = concordium_cis2::TokenIdU32;
-pub type Event = concordium_cis2_security::Cis2SecurityEvent<TokenId, TokenAmount, AgentRole>;
+pub type TokenId = TokenIdU32;
+pub type Event = Cis2SecurityEvent<TokenId, TokenAmount, AgentRole>;
 
 #[derive(Debug, Serialize, SchemaType, PartialEq, Eq, Clone, Copy)]
 pub enum AgentRole {
@@ -23,6 +25,9 @@ pub enum AgentRole {
     Freeze,
     UnFreeze,
     HolderRecovery,
+    Pause,
+    UnPause,
+    Rewarder,
 }
 
 impl AgentRole {
@@ -39,26 +44,34 @@ impl AgentRole {
             Self::Freeze,
             Self::UnFreeze,
             Self::HolderRecovery,
+            Self::Pause,
+            Self::UnPause,
+            Self::Rewarder,
         ]
     }
 }
 
-pub type Agent = AgentWithRoles<AgentRole>;
+pub type Agent = concordium_cis2_security::AgentWithRoles<AgentRole>;
 pub type BurnParams = concordium_cis2_security::BurnParams<TokenId, TokenAmount>;
 pub type Burn = concordium_cis2_security::Burn<TokenId, TokenAmount>;
 pub type FreezeParams = concordium_cis2_security::FreezeParams<TokenId, TokenAmount>;
-pub type FrozenParams = concordium_cis2_security::FrozenParams<TokenId>;
-pub type FrozenResponse = concordium_cis2_security::FrozenResponse<TokenAmount>;
-pub type ContractTransferParams = concordium_cis2::TransferParams<TokenId, TokenAmount>;
+pub type TransferParams = concordium_cis2::TransferParams<TokenId, TokenAmount>;
+pub type PauseParams = concordium_cis2_security::PauseParams<TokenId>;
+pub type IsPausedResponse = concordium_cis2_security::IsPausedResponse;
+pub type BalanceOfQueryParams = concordium_cis2::BalanceOfQueryParams<TokenId>;
+pub type BalanceOfQueryResponse = concordium_cis2::BalanceOfQueryResponse<TokenAmount>;
+pub use concordium_cis2_ext::ContractMetadataUrl;
 pub use concordium_cis2_security::RecoverParam;
-pub use concordium_rwa_utils::cis2_types::ContractMetadataUrl;
 
 #[derive(Serialize, SchemaType)]
 pub struct InitParam {
-    pub identity_registry: ContractAddress,
-    pub compliance:        ContractAddress,
-    pub sponsors:          Vec<ContractAddress>,
-    pub metadata_url:      ContractMetadataUrl,
+    pub identity_registry:         ContractAddress,
+    pub compliance:                ContractAddress,
+    pub sponsors:                  Vec<ContractAddress>,
+    pub metadata_url:              ContractMetadataUrl,
+    pub blank_reward_metadata_url: ContractMetadataUrl,
+    pub tracked_token_id:          TokenId,
+    pub min_reward_token_id:       TokenId,
 }
 
 #[derive(Serialize, SchemaType)]

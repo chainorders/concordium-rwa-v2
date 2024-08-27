@@ -1,12 +1,13 @@
-use super::{state::State, types::ContractResult};
 use concordium_cis2::{
     StandardIdentifier, SupportResult, SupportsQueryParams, SupportsQueryResponse,
     CIS0_STANDARD_IDENTIFIER, CIS2_STANDARD_IDENTIFIER,
 };
-use concordium_rwa_utils::{
-    concordium_cis3::CIS3_STANDARD_IDENTIFIER, sponsors_state::ISponsorsState,
-};
+use concordium_protocols::concordium_cis3::CIS3_STANDARD_IDENTIFIER;
+use concordium_rwa_utils::state_implementations::sponsors_state::ISponsorsState;
 use concordium_std::*;
+
+use super::state::State;
+use super::types::ContractResult;
 
 const SUPPORTS_STANDARDS: [StandardIdentifier<'static>; 2] =
     [CIS0_STANDARD_IDENTIFIER, CIS2_STANDARD_IDENTIFIER];
@@ -21,8 +22,7 @@ const SUPPORTS_STANDARDS: [StandardIdentifier<'static>; 2] =
 /// # Errors
 ///
 /// This method will return an error if:
-/// * `ParseError` - The parameter cursor cannot parse the
-///   `SupportsQueryParams`.
+/// * `ParseError` - The parameter cursor cannot parse the `SupportsQueryParams`.
 #[receive(
     contract = "security_sft_rewards",
     name = "supports",
@@ -36,7 +36,10 @@ fn supports(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<Supports
     for std_id in params.queries {
         if SUPPORTS_STANDARDS.contains(&std_id.as_standard_identifier()) {
             response.push(SupportResult::Support);
-        } else if std_id.as_standard_identifier().eq(&CIS3_STANDARD_IDENTIFIER) {
+        } else if std_id
+            .as_standard_identifier()
+            .eq(&CIS3_STANDARD_IDENTIFIER)
+        {
             response.push(SupportResult::SupportBy(host.state().list_sponsors()));
         } else {
             response.push(SupportResult::NoSupport)

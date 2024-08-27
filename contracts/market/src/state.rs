@@ -1,14 +1,15 @@
-use super::types::{ExchangeRate, *};
-use concordium_rwa_utils::{
-    concordium_cis2_ext::IsTokenAmount,
-    token_deposits_state::{DepositedStateError, DepositedTokenState, IDepositedTokensState},
+use concordium_protocols::concordium_cis2_ext::IsTokenAmount;
+use concordium_rwa_utils::state_implementations::token_deposits_state::{
+    DepositedStateError, DepositedTokenState, IDepositedTokensState,
 };
 use concordium_std::*;
+
+use super::types::{ExchangeRate, *};
 
 #[derive(Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
 /// Represents the state of the market contract.
-pub struct State<S = StateApi> {
+pub struct State<S=StateApi> {
     /// Tokens which can be received by the market contract and kept in custody
     /// of the contract / deposited with the contract.
     deposited_tokens:     StateMap<TokenOwnerUId, DepositedTokenState<Cis2TokenAmount>, S>,
@@ -48,7 +49,10 @@ impl State<StateApi> {
     }
 
     pub fn sell_token_contracts(&self) -> Vec<ContractAddress> {
-        self.sell_token_contracts.iter().map(|r| r.to_owned()).collect()
+        self.sell_token_contracts
+            .iter()
+            .map(|r| r.to_owned())
+            .collect()
     }
 
     pub fn add_sell_token_contract(&mut self, contract: ContractAddress) {

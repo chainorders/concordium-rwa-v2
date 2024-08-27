@@ -1,17 +1,14 @@
-use concordium_rust_sdk::{
-    constants::SHA256,
-    contract_client::CredentialStatus,
-    id::{
-        constants::ArCurve,
-        id_proof_types::{AtomicProof, AtomicStatement},
-        types::AttributeTag,
-    },
-    types::ContractAddress,
-    v2::{self, BlockIdentifier},
-    web3id::{
-        self, did::Network, CredentialHolderId, CredentialLookupError, CredentialProof,
-        PresentationVerificationError, Web3IdAttribute,
-    },
+use concordium_rust_sdk::constants::SHA256;
+use concordium_rust_sdk::contract_client::CredentialStatus;
+use concordium_rust_sdk::id::constants::ArCurve;
+use concordium_rust_sdk::id::id_proof_types::{AtomicProof, AtomicStatement};
+use concordium_rust_sdk::id::types::AttributeTag;
+use concordium_rust_sdk::types::ContractAddress;
+use concordium_rust_sdk::v2::{self, BlockIdentifier};
+use concordium_rust_sdk::web3id::did::Network;
+use concordium_rust_sdk::web3id::{
+    self, CredentialHolderId, CredentialLookupError, CredentialProof,
+    PresentationVerificationError, Web3IdAttribute,
 };
 
 pub type Presentation = concordium_rust_sdk::web3id::Presentation<ArCurve, Web3IdAttribute>;
@@ -58,7 +55,10 @@ pub async fn verify_presentation(
         BlockIdentifier::LastFinal,
     )
     .await?;
-    if !public_data.iter().all(|cm| matches!(cm.status, CredentialStatus::Active)) {
+    if !public_data
+        .iter()
+        .all(|cm| matches!(cm.status, CredentialStatus::Active))
+    {
         return Err(VerifyPresentationError::InActiveCredential);
     }
     let ver_res = presentation.verify(global_context, public_data.iter().map(|cm| &cm.inputs))?;
@@ -96,29 +96,19 @@ fn get_revealed_id_attributes(presentation: &Presentation) -> Vec<(AttributeTag,
         .verifiable_credential
         .iter()
         .filter_map(|vc| match vc {
-            CredentialProof::Account {
-                proofs,
-                ..
-            } => Some(
+            CredentialProof::Account { proofs, .. } => Some(
                 proofs
                     .iter()
                     .filter_map(|proof| match proof {
                         (
-                            AtomicStatement::RevealAttribute {
-                                statement,
-                            },
-                            AtomicProof::RevealAttribute {
-                                attribute,
-                                ..
-                            },
+                            AtomicStatement::RevealAttribute { statement },
+                            AtomicProof::RevealAttribute { attribute, .. },
                         ) => Some((statement.attribute_tag, attribute.clone())),
                         _ => None,
                     })
                     .collect::<Vec<_>>(),
             ),
-            CredentialProof::Web3Id {
-                ..
-            } => None,
+            CredentialProof::Web3Id { .. } => None,
         })
         .flatten()
         .collect::<Vec<_>>()
@@ -129,13 +119,9 @@ fn get_credentials(presentation: &Presentation) -> Vec<(ContractAddress, Credent
         .verifiable_credential
         .iter()
         .filter_map(|vc| match vc {
-            CredentialProof::Account {
-                ..
-            } => None,
+            CredentialProof::Account { .. } => None,
             CredentialProof::Web3Id {
-                contract,
-                holder,
-                ..
+                contract, holder, ..
             } => Some((contract.to_owned(), holder.to_owned())),
         })
         .collect()

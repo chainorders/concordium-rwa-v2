@@ -1,33 +1,30 @@
-use super::{
-    error::Error,
-    state::State,
-    types::{ContractResult, TokenAmount, TokenId},
-};
-use concordium_cis2::*;
-use concordium_rwa_utils::{holders_state::IHoldersState, tokens_state::ITokensState};
+use concordium_rwa_utils::state_implementations::holders_state::IHoldersState;
+use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
 use concordium_std::*;
+
+use super::error::Error;
+use super::state::State;
+use super::types::*;
 
 /// Queries the balance of the specified token IDs for the given addresses.
 ///
-/// This function takes a list of `BalanceOfQueryParams` and returns a
-/// `BalanceOfQueryResponse` containing the token balances for each query.
+/// This function takes a list of `BalanceOfQueryParams` and
+/// returns a `BalanceOfQueryResponse` containing the token balances for each query.
 ///
 /// # Returns
 /// A `ContractResult` containing the token balances for each query.
 #[receive(
     contract = "security_sft_rewards",
     name = "balanceOf",
-    parameter = "BalanceOfQueryParams<TokenId>",
-    return_value = "BalanceOfQueryResponse<TokenAmount>",
+    parameter = "BalanceOfQueryParams",
+    return_value = "BalanceOfQueryResponse",
     error = "super::error::Error"
 )]
 pub fn balance_of(
     ctx: &ReceiveContext,
     host: &Host<State>,
-) -> ContractResult<BalanceOfQueryResponse<TokenAmount>> {
-    let BalanceOfQueryParams {
-        queries,
-    }: BalanceOfQueryParams<TokenId> = ctx.parameter_cursor().get()?;
+) -> ContractResult<BalanceOfQueryResponse> {
+    let BalanceOfQueryParams { queries } = ctx.parameter_cursor().get()?;
     let state = host.state();
     let res: Result<Vec<TokenAmount>, Error> = queries
         .iter()
@@ -37,5 +34,5 @@ pub fn balance_of(
         })
         .collect();
 
-    Ok(BalanceOfQueryResponse(res?))
+    Ok(concordium_cis2::BalanceOfQueryResponse(res?))
 }

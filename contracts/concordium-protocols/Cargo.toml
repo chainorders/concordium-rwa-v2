@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 concordium-std = { version = "10.1.0", default-features = false }
 concordium-cis2 = { version = "6.1.0", default-features = false }
+hex = { version = "0.4.3" }

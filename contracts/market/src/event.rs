@@ -1,5 +1,6 @@
-use super::types::*;
 use concordium_std::*;
+
+use super::types::*;
 
 #[derive(Serialize, SchemaType, Debug)]
 pub struct TokenDeposited {

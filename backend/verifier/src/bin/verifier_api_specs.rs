@@ -1,7 +1,8 @@
-use concordium_rwa_verifier_api::api;
+use std::io::Write;
+use std::path::PathBuf;
 
 use clap::Parser;
-use std::{io::Write, path::PathBuf};
+use concordium_rwa_verifier_api::api;
 
 #[derive(Parser, Debug, Clone)]
 /// Configuration struct for OpenAPI.
@@ -18,5 +19,6 @@ fn main() {
     let api_service = api::create_service();
     let spec_json = api_service.spec();
     let mut file = std::fs::File::create(config.output).expect("Error creating file");
-    file.write_all(spec_json.as_bytes()).expect("Error writing to file");
+    file.write_all(spec_json.as_bytes())
+        .expect("Error writing to file");
 }

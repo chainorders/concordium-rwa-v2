@@ -1,11 +1,11 @@
-use concordium_std::{attributes::NATIONALITY, *};
-
-use super::{state::State, types::*};
-use concordium_rwa_utils::{
-    clients::identity_registry_client::{IdentityRegistryClient, IdentityRegistryContract},
-    common_types::{Identity, IdentityAttribute},
-    compliance_types::*,
+use concordium_protocols::concordium_cis2_security::{
+    identity_registry_client, CanTransferParam, IdentityAttribute,
 };
+use concordium_std::attributes::NATIONALITY;
+use concordium_std::*;
+
+use super::state::State;
+use super::types::*;
 
 #[receive(
     contract = "rwa_compliance_module_allowed_nationalities",
@@ -17,13 +17,9 @@ use concordium_rwa_utils::{
 fn can_transfer(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool> {
     let params: CanTransferParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
     let state = host.state();
-    let idr = IdentityRegistryContract(state.identity_registry());
-    let id: Identity = idr.get_identity(host, params.to)?;
-    for IdentityAttribute {
-        tag,
-        value,
-    } in id.attributes
-    {
+
+    let id = identity_registry_client::get_identity(host, state.identity_registry(), params.to)?;
+    for IdentityAttribute { tag, value } in id.attributes {
         if tag.eq(&NATIONALITY.0) {
             return Ok(state.is_allowed(value));
         }

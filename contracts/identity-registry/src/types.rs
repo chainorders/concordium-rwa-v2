@@ -1,9 +1,9 @@
-use concordium_rwa_utils::common_types;
+use concordium_protocols::concordium_cis2_security;
 
 pub type ContractResult<T> = Result<T, super::error::Error>;
-pub type AttributeTag = common_types::AttributeTag;
-pub type AttributeValue = common_types::AttributeValue;
-pub type Identity = common_types::Identity;
-pub type Issuer = common_types::Issuer;
-pub use common_types::{IdentityAttribute, IdentityCredential};
+pub type AttributeTag = concordium_cis2_security::AttributeTag;
+pub type AttributeValue = concordium_cis2_security::AttributeValue;
+pub type Identity = concordium_cis2_security::Identity;
+pub type Issuer = concordium_cis2_security::Issuer;
+pub use concordium_cis2_security::{IdentityAttribute, IdentityCredential};
 pub type CredentialId = concordium_std::PublicKeyEd25519;

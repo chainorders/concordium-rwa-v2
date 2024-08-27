@@ -14,6 +14,7 @@ concordium-std = { version = "10.1.0", default-features = false }
 concordium-cis2 = { version = "6.1.0", default-features = false }
 hex = { version = "0.4.3" }
 concordium-rwa-utils = { path = "../utils" }
+concordium-protocols = { path = "../concordium-protocols" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
