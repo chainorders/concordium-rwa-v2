@@ -12,7 +12,6 @@ std = ["concordium-std/std", "concordium-cis2/std"]
 [dependencies]
 concordium-std = { version = "10.1.0", default-features = false }
 concordium-cis2 = { version = "6.1.0", default-features = false }
-hex = { version = "0.4.3" }
 concordium-protocols = { path = "../concordium-protocols" }
 
 [lib]

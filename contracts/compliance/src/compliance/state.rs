@@ -1,12 +1,11 @@
+use concordium_rwa_utils::state_implementations::agents_state::IsAgentsState;
 use concordium_std::*;
-
-use concordium_rwa_utils::{agents_state::IsAgentsState, clients::contract_client::IContractState};
 
 use super::types::Module;
 
 #[derive(Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
-pub struct State<S = StateApi> {
+pub struct State<S=StateApi> {
     pub modules: StateSet<Module, S>,
     pub agents:  StateSet<Address, S>,
 }
@@ -32,7 +31,6 @@ impl State {
     pub fn modules(&self) -> Vec<Module> { self.modules.iter().map(|m| m.to_owned()).collect() }
 }
 
-impl IContractState for State {}
 impl IsAgentsState<StateApi> for State {
     fn agents(&self) -> &StateSet<Address, StateApi> { &self.agents }
 

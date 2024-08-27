@@ -1,21 +1,19 @@
-use super::db;
-use crate::txn_listener::EventsProcessor;
-use anyhow::Ok;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use concordium_rust_sdk::{
-    cis2::{self},
-    types::{
-        smart_contracts::{ContractEvent, ModuleReference, OwnedContractName},
-        ContractAddress,
-    },
+use concordium_rust_sdk::cis2::{self};
+use concordium_rust_sdk::types::smart_contracts::{
+    ContractEvent, ModuleReference, OwnedContractName,
 };
+use concordium_rust_sdk::types::ContractAddress;
 use concordium_rwa_backend_shared::db::{DbConn, DbPool};
 use concordium_rwa_market::event::{Event, PaymentAmount, PaymentTokenUId};
 use diesel::Connection;
 use log::debug;
 use num_bigint::BigUint;
 use num_traits::Zero;
+
+use super::db;
+use crate::txn_listener::{EventsProcessor, ProcessorError};
 
 pub struct RwaMarketProcessor {
     pub pool:          DbPool,
@@ -57,7 +55,7 @@ impl EventsProcessor for RwaMarketProcessor {
         &mut self,
         contract: &ContractAddress,
         events: &[ContractEvent],
-    ) -> anyhow::Result<u64> {
+    ) -> Result<u64, ProcessorError> {
         let mut conn = self.pool.get()?;
         let count = process_events(&mut conn, Utc::now(), contract, events)?;
         Ok(count as u64)
@@ -69,7 +67,7 @@ pub fn process_events(
     _now: DateTime<Utc>,
     contract: &ContractAddress,
     events: &[ContractEvent],
-) -> anyhow::Result<usize> {
+) -> Result<usize, ProcessorError> {
     let mut process_events_count: usize = 0;
     for event in events {
         let parsed_event = event.parse::<Event>()?;
@@ -153,10 +151,11 @@ pub fn process_events(
                             e.pay_token_owner,
                             amount.0.into(),
                         )?;
-                    }
+                    };
 
-                    Ok(())
+                    Ok::<_, ProcessorError>(())
                 })?;
+
                 debug!("Exchanged Market Token");
                 process_events_count += 1;
             }

@@ -1,10 +1,13 @@
-use crate::schema::{self, verifier_challenges::dsl::*};
 use chrono::{DateTime, NaiveDateTime, Utc};
-use concordium_rust_sdk::{
-    base::hashes::TransactionHash, id::types::AccountAddress, types::ContractAddress,
-};
+use concordium_rust_sdk::base::hashes::TransactionHash;
+use concordium_rust_sdk::id::types::AccountAddress;
+use concordium_rust_sdk::types::ContractAddress;
 use concordium_rwa_backend_shared::db::{DbConn, DbResult};
-use diesel::{dsl::*, prelude::*};
+use diesel::dsl::*;
+use diesel::prelude::*;
+
+use crate::schema::verifier_challenges::dsl::*;
+use crate::schema::{self};
 
 #[derive(Selectable, Queryable, Identifiable)]
 #[diesel(primary_key(id))]

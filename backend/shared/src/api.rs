@@ -1,13 +1,9 @@
-use concordium_rust_sdk::{
-    cis2,
-    smart_contracts::common::{AccountAddressParseError, AddressParseError},
-    types::{Address, ContractAddress},
-};
-use poem_openapi::{
-    payload::Json,
-    types::{ParseFromJSON, ToJSON, Type},
-    ApiResponse, Object,
-};
+use concordium_rust_sdk::cis2;
+use concordium_rust_sdk::smart_contracts::common::{AccountAddressParseError, AddressParseError};
+use concordium_rust_sdk::types::{Address, ContractAddress};
+use poem_openapi::payload::Json;
+use poem_openapi::types::{ParseFromJSON, ToJSON, Type};
+use poem_openapi::{ApiResponse, Object};
 
 pub const PAGE_SIZE: i64 = 20;
 
@@ -89,7 +85,7 @@ impl From<Address> for ApiAddress {
 /// Pages Response. This is a generic response that can be used to return a list
 /// of items with pagination.
 #[derive(Object)]
-pub struct PagedResponse<T: Sync + Send + Type + ToJSON + ParseFromJSON> {
+pub struct PagedResponse<T: Sync+Send+Type+ToJSON+ParseFromJSON> {
     pub page_count: i64,
     pub page:       i64,
     pub data:       Vec<T>,

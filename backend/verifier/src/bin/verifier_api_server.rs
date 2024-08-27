@@ -1,39 +1,29 @@
-use concordium_rwa_verifier_api::{
-    api,
-    identity_registry_client::IdentityRegistryClient,
-    web3_id_utils::{CredStatement, GlobalContext, IdStatement},
-};
-
-use futures::{StreamExt, TryStreamExt};
-use std::{
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use chrono::Datelike;
 use clap::Parser;
-use concordium_rust_sdk::{
-    id::{
-        constants::AttributeKind,
-        id_proof_types::{AtomicStatement, AttributeInRangeStatement, RevealAttributeStatement},
-        types::AttributeTag,
-    },
-    types::{Address, ContractAddress, Energy, WalletAccount},
-    v2::{self, BlockIdentifier},
-    web3id::{did::Network, Web3IdAttribute},
+use concordium_rust_sdk::id::constants::AttributeKind;
+use concordium_rust_sdk::id::id_proof_types::{
+    AtomicStatement, AttributeInRangeStatement, RevealAttributeStatement,
 };
+use concordium_rust_sdk::id::types::AttributeTag;
+use concordium_rust_sdk::types::{Address, ContractAddress, Energy, WalletAccount};
+use concordium_rust_sdk::v2::{self, BlockIdentifier};
+use concordium_rust_sdk::web3id::did::Network;
+use concordium_rust_sdk::web3id::Web3IdAttribute;
 use concordium_rwa_backend_shared::db::DbPool;
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    Connection, PgConnection,
-};
+use concordium_rwa_verifier_api::api;
+use concordium_rwa_verifier_api::identity_registry_client::IdentityRegistryClient;
+use concordium_rwa_verifier_api::web3_id_utils::{CredStatement, GlobalContext, IdStatement};
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::{Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use futures::{StreamExt, TryStreamExt};
 use log::{debug, info};
-use poem::{
-    listener::TcpListener,
-    middleware::{AddData, Cors},
-    EndpointExt, Route, Server,
-};
+use poem::listener::TcpListener;
+use poem::middleware::{AddData, Cors};
+use poem::{EndpointExt, Route, Server};
 
 #[derive(Parser, Debug, Clone)]
 pub struct Config {
@@ -78,15 +68,23 @@ async fn create_server_routes(config: Config) -> impl poem::Endpoint {
     )
     .expect("Failed to load wallet");
     let agent_address = wallet.address;
-    let identity_registry: ContractAddress =
-        config.identity_registry.parse().expect("Failed to parse identity registry address");
+    let identity_registry: ContractAddress = config
+        .identity_registry
+        .parse()
+        .expect("Failed to parse identity registry address");
     let network: Network = config.network.parse().expect("Failed to parse network");
-    let max_energy: Energy = config.max_energy.parse().expect("Failed to parse max energy");
+    let max_energy: Energy = config
+        .max_energy
+        .parse()
+        .expect("Failed to parse max energy");
 
-    let endpoint: v2::Endpoint =
-        config.concordium_node_uri.parse().expect("Failed to parse Concordium Node URI");
-    let mut concordium_client =
-        v2::Client::new(endpoint).await.expect("Failed to create Concordium Client");
+    let endpoint: v2::Endpoint = config
+        .concordium_node_uri
+        .parse()
+        .expect("Failed to parse Concordium Node URI");
+    let mut concordium_client = v2::Client::new(endpoint)
+        .await
+        .expect("Failed to create Concordium Client");
 
     let (global_context, identity_providers) =
         get_concordium_identity_providers(&mut concordium_client)
@@ -95,7 +93,10 @@ async fn create_server_routes(config: Config) -> impl poem::Endpoint {
 
     let mut identity_registry_client =
         IdentityRegistryClient::new(concordium_client.clone(), identity_registry);
-    let issuers = identity_registry_client.issuers().await.expect("Failed to get issuers");
+    let issuers = identity_registry_client
+        .issuers()
+        .await
+        .expect("Failed to get issuers");
     info!("Issuers: {:?}", issuers);
 
     identity_registry_client
@@ -107,7 +108,10 @@ async fn create_server_routes(config: Config) -> impl poem::Endpoint {
 
     let (id_statement, cred_statement) = create_statements();
     let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-    let pool: DbPool = Pool::builder().max_size(config.db_pool_max_size).build(manager).unwrap();
+    let pool: DbPool = Pool::builder()
+        .max_size(config.db_pool_max_size)
+        .build(manager)
+        .unwrap();
     let api_service = api::create_service();
     let ui = api_service.swagger_ui();
 
@@ -165,9 +169,17 @@ fn create_statements() -> (IdStatement, CredStatement) {
 
 async fn get_concordium_identity_providers(
     concordium_client: &mut v2::Client,
-) -> Result<(GlobalContext, Vec<concordium_rust_sdk::id::types::IpIdentity>), anyhow::Error> {
-    let global_context =
-        concordium_client.get_cryptographic_parameters(BlockIdentifier::LastFinal).await?.response;
+) -> Result<
+    (
+        GlobalContext,
+        Vec<concordium_rust_sdk::id::types::IpIdentity>,
+    ),
+    anyhow::Error,
+> {
+    let global_context = concordium_client
+        .get_cryptographic_parameters(BlockIdentifier::LastFinal)
+        .await?
+        .response;
     let identity_providers = concordium_client
         .get_identity_providers(BlockIdentifier::LastFinal)
         .await?
@@ -189,7 +201,10 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 fn run_migrations(database_url: &str) {
     info!("Running migrations on database: {}", database_url);
     let mut conn = PgConnection::establish(database_url).expect("Error connecting to Postgres");
-    let applied_migrations =
-        conn.run_pending_migrations(MIGRATIONS).expect("Error running migrations");
-    applied_migrations.iter().for_each(|m| info!("Applied migration: {}", m));
+    let applied_migrations = conn
+        .run_pending_migrations(MIGRATIONS)
+        .expect("Error running migrations");
+    applied_migrations
+        .iter()
+        .for_each(|m| info!("Applied migration: {}", m));
 }

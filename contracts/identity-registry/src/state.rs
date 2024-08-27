@@ -1,7 +1,7 @@
-use super::types::{AttributeTag, AttributeValue, *};
-use concordium_rwa_utils::{agents_state::IsAgentsState, clients::contract_client::IContractState};
+use concordium_rwa_utils::state_implementations::agents_state::IsAgentsState;
 use concordium_std::*;
 
+use super::types::{AttributeTag, AttributeValue, *};
 #[derive(Serial, DeserialWithState, Deletable)]
 #[concordium(state_parameter = "S")]
 /// Represents the state of an identity in the identity registry.
@@ -67,16 +67,22 @@ impl<S: HasStateApi> IdentityState<S> {
 impl<S: HasStateApi> PartialEq for IdentityState<S> {
     fn eq(&self, other: &Self) -> bool {
         for (tag, val) in self.attributes.iter() {
-            let is_attr_same =
-                other.attributes.get(&tag).map(|val2| val.eq(&*val2)).unwrap_or(false);
+            let is_attr_same = other
+                .attributes
+                .get(&tag)
+                .map(|val2| val.eq(&*val2))
+                .unwrap_or(false);
             if !is_attr_same {
                 return false;
             }
         }
 
         for (issuer, key) in self.credentials.iter() {
-            let is_cred_same =
-                other.credentials.get(&issuer).map(|key2| key.eq(&*key2)).unwrap_or(false);
+            let is_cred_same = other
+                .credentials
+                .get(&issuer)
+                .map(|key2| key.eq(&*key2))
+                .unwrap_or(false);
             if !is_cred_same {
                 return false;
             }
@@ -93,19 +99,11 @@ impl<S: HasStateApi> IdentityState<S> {
             credentials: state_builder.new_map(),
         };
 
-        for IdentityAttribute {
-            tag,
-            value,
-        } in identity.attributes
-        {
+        for IdentityAttribute { tag, value } in identity.attributes {
             let _ = ret.attributes.insert(tag, value);
         }
 
-        for IdentityCredential {
-            issuer,
-            key,
-        } in identity.credentials
-        {
+        for IdentityCredential { issuer, key } in identity.credentials {
             let _ = ret.credentials.insert(issuer, key);
         }
 
@@ -115,7 +113,7 @@ impl<S: HasStateApi> IdentityState<S> {
 
 #[derive(Serial, DeserialWithState)]
 #[concordium(state_parameter = "S")]
-pub struct State<S = StateApi> {
+pub struct State<S=StateApi> {
     pub identities: StateMap<Address, IdentityState<S>, S>,
     pub issuers:    StateSet<Issuer, S>,
     pub agents:     StateSet<Address, S>,
@@ -138,7 +136,6 @@ impl<S: HasStateApi> State<S> {
     }
 }
 
-impl IContractState for State {}
 impl IsAgentsState<StateApi> for State {
     fn agents(&self) -> &StateSet<Address, StateApi> { &self.agents }
 

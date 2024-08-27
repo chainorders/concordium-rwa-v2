@@ -1,16 +1,11 @@
-use super::{
-    cis2_test_contract::{ICis2Contract, ICis2ContractUnitTokenExt},
-    test_contract_client::*,
-};
-use concordium_cis2::{TokenAmountU64, TokenIdUnit};
-use concordium_std::{
-    Address, ContractAddress, Deserial, OwnedContractName, SchemaType, Serial, Serialize,
-};
+use concordium_cis2::{TokenAmountU64, TokenIdUnit, UpdateOperator, UpdateOperatorParams};
+use concordium_smart_contract_testing::*;
+use concordium_std::{Deserial, SchemaType, Serial, Serialize};
 
-//Euroe types have been copied so that the concordium std and cis2 crates have
-// independent dependencies
-/// The parameter for the contract function `mint` which mints an amount of
-/// EUROe to a given address.
+use super::{cis2, MAX_ENERGY};
+pub const MODULE_PATH: &str = "../euroe/dist/module.wasm.v1";
+pub const CONTRACT_NAME: ContractName = ContractName::new_unchecked("init_euroe_stablecoin");
+
 #[derive(Serial, Deserial, SchemaType)]
 pub struct MintParams {
     pub owner:  Address,
@@ -26,73 +21,126 @@ pub struct RoleTypes {
     pub adminrole: Address,
 }
 
-pub const CONTRACT_NAME: &str = "init_euroe_stablecoin";
-
-pub trait IEuroeModule: ITestModule {
-    fn euroe(&self) -> GenericInit<(), concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>> {
-        GenericInit::<(), concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>::new(
-            self.module_ref(),
-            CONTRACT_NAME,
+pub fn deploy_module(chain: &mut Chain, sender: &Account) -> ModuleDeploySuccess {
+    chain
+        .module_deploy_v1(
+            Signer::with_one_key(),
+            sender.address,
+            module_load_v1(MODULE_PATH).unwrap(),
         )
-    }
+        .expect("deploying module")
 }
 
-pub trait IEuroeContract:
-    ICis2Contract<TokenIdUnit, TokenAmountU64, concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>
-{
-    fn grant_role(
-        &self,
-    ) -> GenericReceive<RoleTypes, (), concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>
-    {
-        GenericReceive::<RoleTypes, (),  concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>::new(
-            self.contract_address(),
-            Self::contract_name(),
-            "grantRole", self.max_energy())
-    }
-
-    fn mint(
-        &self,
-    ) -> GenericReceive<MintParams, (), concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>
-    {
-        GenericReceive::<MintParams, (), concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>>::new(self.contract_address(), Self::contract_name(), "mint", self.max_energy())
-    }
+pub fn init(chain: &mut Chain, sender: &Account) -> ContractInitSuccess {
+    chain
+        .contract_init(
+            Signer::with_one_key(),
+            sender.address,
+            MAX_ENERGY,
+            InitContractPayload {
+                amount:    Amount::zero(),
+                init_name: CONTRACT_NAME.to_owned(),
+                mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
+                param:     OwnedParameter::empty(),
+            },
+        )
+        .expect("init")
 }
 
-pub struct EuroeModule {
-    pub module_path: String,
+pub fn grant_role(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    params: &RoleTypes,
+) -> ContractInvokeSuccess {
+    chain
+        .contract_update(
+            Signer::with_one_key(),
+            sender.address,
+            sender.address.into(),
+            MAX_ENERGY,
+            UpdateContractPayload {
+                address:      contract,
+                amount:       Amount::zero(),
+                receive_name: OwnedReceiveName::construct_unchecked(
+                    CONTRACT_NAME,
+                    EntrypointName::new_unchecked("grantRole"),
+                ),
+                message:      OwnedParameter::from_serial(params).unwrap(),
+            },
+        )
+        .expect("grant role")
 }
 
-impl ITestModule for EuroeModule {
-    fn module_path(&self) -> String { self.module_path.to_owned() }
+pub fn mint(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    params: &MintParams,
+) -> ContractInvokeSuccess {
+    chain
+        .contract_update(
+            Signer::with_one_key(),
+            sender.address,
+            sender.address.into(),
+            MAX_ENERGY,
+            UpdateContractPayload {
+                address:      contract,
+                amount:       Amount::zero(),
+                receive_name: OwnedReceiveName::construct_unchecked(
+                    CONTRACT_NAME,
+                    EntrypointName::new_unchecked("mint"),
+                ),
+                message:      OwnedParameter::from_serial(params).unwrap(),
+            },
+        )
+        .expect("mint")
 }
 
-impl IEuroeModule for EuroeModule {}
-
-pub struct EuroeContract(pub ContractAddress);
-
-impl ITestContract for EuroeContract {
-    fn contract_name() -> OwnedContractName {
-        OwnedContractName::new_unchecked(CONTRACT_NAME.to_owned())
-    }
-
-    fn contract_address(&self) -> ContractAddress { self.0 }
+pub fn transfer_single(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: concordium_cis2::Transfer<TokenIdUnit, TokenAmountU64>,
+) -> ContractInvokeSuccess {
+    cis2::transfer_single(chain, sender, contract, CONTRACT_NAME, payload)
 }
 
-impl
-    ICis2Contract<
-        TokenIdUnit,
-        TokenAmountU64,
-        concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>,
-    > for EuroeContract
-{
+pub fn balance_of_single(
+    chain: &mut Chain,
+    invoker: &Account,
+    contract: ContractAddress,
+    address: Address,
+) -> TokenAmountU64 {
+    cis2::balance_of_single(
+        chain,
+        invoker,
+        contract,
+        TokenIdUnit(),
+        address,
+        CONTRACT_NAME,
+    )
 }
 
-impl
-    ICis2ContractUnitTokenExt<
-        TokenAmountU64,
-        concordium_cis2::Cis2Event<TokenIdUnit, TokenAmountU64>,
-    > for EuroeContract
-{
+pub fn update_operator(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: &UpdateOperatorParams,
+) -> ContractInvokeSuccess {
+    cis2::update_operator(chain, sender, contract, CONTRACT_NAME, payload)
 }
 
-impl IEuroeContract for EuroeContract {}
+pub fn update_operator_single(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: UpdateOperator,
+) -> ContractInvokeSuccess {
+    update_operator(
+        chain,
+        sender,
+        contract,
+        &UpdateOperatorParams(vec![payload]),
+    )
+}

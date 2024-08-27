@@ -1,71 +1,115 @@
-use super::test_contract_client::*;
-use concordium_rwa_market::{
-    deposit::DepositParams,
-    event::Event,
-    exchange::{Amounts, ExchangeParams},
-    init::InitParams,
-    list::GetListedParam,
-    types::Cis2TokenAmount,
-};
+use concordium_cis2::TokenAmountU64;
+use concordium_rwa_market::deposit::DepositParams;
+use concordium_rwa_market::exchange::{Amounts, ExchangeParams};
+use concordium_rwa_market::init::InitParams;
+use concordium_rwa_market::list::GetListedParam;
 use concordium_smart_contract_testing::*;
 
-pub const CONTRACT_NAME: &str = "init_rwa_market";
+use super::MAX_ENERGY;
+const MODULE_PATH: &str = "../market/contract.wasm.v1";
+const CONTRACT_NAME: ContractName = ContractName::new_unchecked("init_rwa_market");
 
-pub trait IMarketModule: ITestModule {
-    fn rwa_market(&self) -> GenericInit<InitParams, Event> {
-        GenericInit::<InitParams, Event>::new(self.module_ref(), CONTRACT_NAME)
-    }
-}
-
-pub trait IMarketContract: ITestContract {
-    fn deposit(&self) -> GenericReceive<DepositParams, (), Event> {
-        GenericReceive::<DepositParams, (), Event>::new(
-            self.contract_address(),
-            Self::contract_name(),
-            "deposit",
-            self.max_energy(),
+pub fn deploy_module(chain: &mut Chain, sender: &Account) -> ModuleDeploySuccess {
+    chain
+        .module_deploy_v1(
+            Signer::with_one_key(),
+            sender.address,
+            module_load_v1(MODULE_PATH).unwrap(),
         )
-    }
+        .expect("deploying module")
+}
 
-    fn balance_of_listed(
-        &self,
-    ) -> GenericReceive<GetListedParam, concordium_cis2::TokenAmountU64, Event> {
-        GenericReceive::<GetListedParam, Cis2TokenAmount, Event>::new(
-            self.contract_address(),
-            Self::contract_name(),
-            "balanceOfListed",
-            self.max_energy(),
+pub fn init(chain: &mut Chain, sender: &Account, param: &InitParams) -> ContractInitSuccess {
+    chain
+        .contract_init(
+            Signer::with_one_key(),
+            sender.address,
+            MAX_ENERGY,
+            InitContractPayload {
+                amount:    Amount::zero(),
+                init_name: CONTRACT_NAME.to_owned(),
+                mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
+                param:     OwnedParameter::from_serial(param).unwrap(),
+            },
         )
-    }
+        .expect("init")
+}
 
-    fn calculate_amounts(&self) -> GenericReceive<ExchangeParams, Amounts, Event> {
-        GenericReceive::<ExchangeParams, Amounts, Event>::new(
-            self.contract_address(),
-            Self::contract_name(),
-            "calculateAmounts",
-            self.max_energy(),
+pub const DEPOSIT_RECEIVE_NAME: &str = "deposit";
+
+pub fn deposit(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: &ContractAddress,
+    params: &DepositParams,
+) -> ContractInvokeSuccess {
+    chain
+        .contract_update(
+            Signer::with_one_key(),
+            sender.address,
+            sender.address.into(),
+            MAX_ENERGY,
+            UpdateContractPayload {
+                address:      *contract,
+                amount:       Amount::zero(),
+                receive_name: OwnedReceiveName::construct_unchecked(
+                    CONTRACT_NAME,
+                    EntrypointName::new_unchecked("deposit"),
+                ),
+                message:      OwnedParameter::from_serial(params).unwrap(),
+            },
         )
-    }
+        .expect("deposit")
 }
 
-pub struct MarketContract(pub ContractAddress);
-
-impl ITestContract for MarketContract {
-    fn contract_name() -> OwnedContractName {
-        OwnedContractName::new_unchecked(CONTRACT_NAME.to_owned())
-    }
-
-    fn contract_address(&self) -> ContractAddress { self.0 }
+pub fn balance_of_listed(
+    chain: &mut Chain,
+    invoker: &Account,
+    contract: &ContractAddress,
+    payload: &GetListedParam,
+) -> TokenAmountU64 {
+    chain
+        .contract_invoke(
+            invoker.address,
+            concordium_smart_contract_testing::Address::Account(invoker.address),
+            MAX_ENERGY,
+            UpdateContractPayload {
+                address:      *contract,
+                amount:       Amount::zero(),
+                receive_name: OwnedReceiveName::construct_unchecked(
+                    CONTRACT_NAME,
+                    EntrypointName::new_unchecked("balanceOfDeposited"),
+                ),
+                message:      OwnedParameter::from_serial(payload).unwrap(),
+            },
+        )
+        .expect("balance of listed")
+        .parse_return_value()
+        .unwrap()
 }
 
-impl IMarketContract for MarketContract {}
-
-pub struct MarketModule {
-    pub module_path: String,
+pub fn calculate_amounts(
+    chain: &mut Chain,
+    invoker: &Account,
+    contract: &ContractAddress,
+    payload: &ExchangeParams,
+) -> Amounts {
+    chain
+        .contract_invoke(
+            invoker.address,
+            concordium_smart_contract_testing::Address::Account(invoker.address),
+            MAX_ENERGY,
+            UpdateContractPayload {
+                address:      *contract,
+                amount:       Amount::zero(),
+                receive_name: OwnedReceiveName::construct_unchecked(
+                    CONTRACT_NAME,
+                    EntrypointName::new_unchecked("calculateAmounts"),
+                ),
+                message:      OwnedParameter::from_serial(payload).unwrap(),
+            },
+        )
+        .expect("calculate amounts")
+        .parse_return_value()
+        .unwrap()
 }
-
-impl ITestModule for MarketModule {
-    fn module_path(&self) -> String { self.module_path.to_owned() }
-}
-
-impl IMarketModule for MarketModule {}

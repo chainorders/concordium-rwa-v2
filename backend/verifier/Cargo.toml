@@ -5,7 +5,6 @@ authors = ["parv@stactrace.com"]
 
 [dependencies]
 concordium-cis2 = { version = "6.1.0", default-features = false }
-concordium-rwa-sponsor = { path = "../../contracts/sponsor" }
 concordium_rwa_backend_shared = {path = "../shared"}
 concordium-rust-sdk = "4.3.0"
 poem-openapi = { version = "3.0.5", features = ["swagger-ui"] }

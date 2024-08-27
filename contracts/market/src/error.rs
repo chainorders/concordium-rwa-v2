@@ -1,6 +1,5 @@
-use concordium_rwa_utils::{
-    cis2_conversions::ExchangeError, token_deposits_state::DepositedStateError,
-};
+use concordium_rwa_utils::conversions::exchange_rate::ExchangeError;
+use concordium_rwa_utils::state_implementations::token_deposits_state::DepositedStateError;
 use concordium_std::*;
 
 #[derive(Serial, Reject, SchemaType, Debug)]

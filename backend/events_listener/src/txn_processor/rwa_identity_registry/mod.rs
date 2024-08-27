@@ -7,26 +7,24 @@
 
 pub mod db;
 pub mod processor;
-//todo add api module exposing open api
-//todo update integration tests using the api
+// todo add api module exposing open api
+// todo update integration tests using the api
 #[cfg(test)]
 mod integration_tests {
-    use anyhow::Ok;
     use chrono::{DateTime, Utc};
-    use concordium_rust_sdk::{
-        base::smart_contracts::ContractEvent,
-        id::types::{AccountAddress, ACCOUNT_ADDRESS_SIZE},
-        types::{Address, ContractAddress},
-    };
+    use concordium_rust_sdk::base::smart_contracts::ContractEvent;
+    use concordium_rust_sdk::id::types::{AccountAddress, ACCOUNT_ADDRESS_SIZE};
+    use concordium_rust_sdk::types::{Address, ContractAddress};
     use concordium_rwa_backend_shared::test::{create_new_database_container, to_contract_event};
-    use diesel::{r2d2::ConnectionManager, Connection, PgConnection};
+    use concordium_rwa_identity_registry::event::{
+        AgentUpdatedEvent, Event, IdentityUpdatedEvent, IssuerUpdatedEvent,
+    };
+    use diesel::r2d2::ConnectionManager;
+    use diesel::{Connection, PgConnection};
     use diesel_migrations::{embed_migrations, EmbeddedMigrations};
     use r2d2::Pool;
 
     use crate::txn_processor::rwa_identity_registry::{db, processor};
-    use concordium_rwa_identity_registry::event::{
-        AgentUpdatedEvent, Event, IdentityUpdatedEvent, IssuerUpdatedEvent,
-    };
 
     const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
@@ -77,8 +75,10 @@ mod integration_tests {
         let events: Vec<ContractEvent> = events.iter().map(to_contract_event).collect();
 
         let manager = ConnectionManager::<PgConnection>::new(database_url);
-        let pool =
-            Pool::builder().max_size(1).build(manager).expect("Error creating database pool");
+        let pool = Pool::builder()
+            .max_size(1)
+            .build(manager)
+            .expect("Error creating database pool");
         let mut conn = pool.get().expect("Error getting database connection");
 
         conn.test_transaction(|conn| {
@@ -116,7 +116,7 @@ mod integration_tests {
                 &contract_address
             )]);
             assert_eq!(page_count, 1);
-            Ok(())
+            Ok::<_, diesel::result::Error>(())
         });
     }
 }

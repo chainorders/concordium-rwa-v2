@@ -9,10 +9,8 @@ concordium-cis2 = { version = "6.1.0", default-features = false }
 concordium-protocols = { path = "../concordium-protocols" }
 concordium-rwa-identity-registry = { path = "../identity-registry" }
 concordium-rwa-compliance = { path = "../compliance" }
-concordium-rwa-security-nft = { path = "../security-nft" }
-concordium-rwa-security-sft = { path = "../security-sft" }
+security-sft-rewards = { path = "../security-sft-rewards" }
 concordium-rwa-market = { path = "../market" }
-concordium-rwa-sponsor = { path = "../sponsor" }
 rand_core = "0.6.4"
 
 [dev-dependencies]

@@ -1,10 +1,9 @@
+use concordium_protocols::concordium_cis2_security::{compliance_client, TransferredParam};
 use concordium_std::*;
 
-use super::{error::Error, state::State, types::*};
-use concordium_rwa_utils::{
-    clients::compliance_client::{ComplianceContract, IComplianceClient},
-    compliance_types::*,
-};
+use super::error::Error;
+use super::state::State;
+use super::types::*;
 
 /// Handles the `transferred` event in the `rwa_compliance` contract.
 ///
@@ -26,18 +25,13 @@ use concordium_rwa_utils::{
 fn transferred(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<()> {
     let params: TransferredParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
     let state = host.state();
-    let token_id = params.token_id;
 
     for module in state.modules.iter() {
-        ensure!(ctx.sender().matches_contract(&token_id.contract), Error::Unauthorized);
-
-        ComplianceContract(module.to_owned()).transferred(
-            host,
-            token_id.clone(),
-            params.from,
-            params.to,
-            params.amount,
-        )?;
+        ensure!(
+            ctx.sender().matches_contract(&params.token_id.contract),
+            Error::Unauthorized
+        );
+        compliance_client::transferred(host, module.to_owned(), &params)?;
     }
 
     Ok(())

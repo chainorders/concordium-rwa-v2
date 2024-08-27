@@ -1,6 +1,7 @@
 use concordium_std::*;
 
-use super::{state::State, types::*};
+use super::state::State;
+use super::types::*;
 
 /// Handles the `minted` event in the `rwa_compliance` contract.
 ///

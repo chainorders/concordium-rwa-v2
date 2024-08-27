@@ -1,6 +1,8 @@
 use concordium_std::*;
 
-use super::{error::Error, state::State, types::ContractResult};
+use super::error::Error;
+use super::state::State;
+use super::types::ContractResult;
 
 /// Handles the `isSame` contract call in the `rwa_identity_registry` contract.
 ///
@@ -22,8 +24,16 @@ use super::{error::Error, state::State, types::ContractResult};
 )]
 fn is_same(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool> {
     let (address1, address2): (Address, Address) = ctx.parameter_cursor().get()?;
-    let identity_1 = host.state.identities.get(&address1).ok_or(Error::IdentityNotFound)?;
-    let identity_2 = host.state.identities.get(&address2).ok_or(Error::IdentityNotFound)?;
+    let identity_1 = host
+        .state
+        .identities
+        .get(&address1)
+        .ok_or(Error::IdentityNotFound)?;
+    let identity_2 = host
+        .state
+        .identities
+        .get(&address2)
+        .ok_or(Error::IdentityNotFound)?;
 
     Ok(identity_1.eq(&identity_2))
 }

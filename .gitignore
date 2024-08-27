@@ -1,7 +1,5 @@
 node_modules
 **/target
-contracts/**/contract.wasm.v1
-contracts/**/schema.bin
 .yarn
 .pnp.cjs
 out

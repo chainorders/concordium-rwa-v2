@@ -8,4 +8,4 @@
 
 mod db;
 mod listener;
-pub use listener::{EventsProcessor, TransactionsListener};
+pub use listener::{EventsProcessor, ListenerError, ProcessorError, TransactionsListener};

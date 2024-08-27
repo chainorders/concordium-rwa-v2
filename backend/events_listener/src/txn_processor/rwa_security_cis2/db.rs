@@ -1,18 +1,18 @@
+use std::ops::{Add, Sub};
+
+use bigdecimal::BigDecimal;
+use chrono::NaiveDateTime;
+use concordium_rust_sdk::cis2;
+use concordium_rust_sdk::common::types::Timestamp;
+use concordium_rust_sdk::types::{Address, ContractAddress};
+use concordium_rwa_backend_shared::db::{to_naive_utc, token_amount_to_sql, DbConn, DbResult};
+use diesel::prelude::*;
+use num_traits::Zero;
+
 use crate::schema::{
     cis2_agents, cis2_compliances, cis2_deposits, cis2_identity_registries, cis2_operators,
     cis2_recovery_records, cis2_token_holders, cis2_tokens,
 };
-use bigdecimal::BigDecimal;
-use chrono::NaiveDateTime;
-use concordium_rust_sdk::{
-    cis2,
-    common::types::Timestamp,
-    types::{Address, ContractAddress},
-};
-use concordium_rwa_backend_shared::db::{to_naive_utc, token_amount_to_sql, DbConn, DbResult};
-use diesel::prelude::*;
-use num_traits::Zero;
-use std::ops::{Add, Sub};
 
 #[derive(Selectable, Queryable, Identifiable, Insertable, Debug, PartialEq)]
 #[diesel(table_name = cis2_agents)]
@@ -46,14 +46,19 @@ pub fn list_agents(
         .limit(page_size)
         .offset(page_size * page)
         .get_results(conn)?;
-    let count: i64 = cis2_agents::table.filter(select_filter).count().get_result(conn)?;
+    let count: i64 = cis2_agents::table
+        .filter(select_filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count + page_size - 1) / page_size;
 
     Ok((res, page_count))
 }
 
 pub fn insert_agent(conn: &mut DbConn, agent: Agent) -> DbResult<()> {
-    let updated_rows = diesel::insert_into(cis2_agents::table).values(agent).execute(conn)?;
+    let updated_rows = diesel::insert_into(cis2_agents::table)
+        .values(agent)
+        .execute(conn)?;
     assert_eq!(updated_rows, 1, "error {} rows were updated", updated_rows);
     Ok(())
 }
@@ -66,7 +71,9 @@ pub fn remove_agent(
     let delete_filter = cis2_agents::cis2_address
         .eq(cis2_address.to_string())
         .and(cis2_agents::agent_address.eq(agent_address.to_string()));
-    let updated_rows = diesel::delete(cis2_agents::table).filter(delete_filter).execute(conn)?;
+    let updated_rows = diesel::delete(cis2_agents::table)
+        .filter(delete_filter)
+        .execute(conn)?;
     assert_eq!(updated_rows, 1, "error {} rows were updated", updated_rows);
     Ok(())
 }
@@ -148,8 +155,10 @@ pub fn update_token_paused(
         .and(cis2_tokens::token_id.eq(token_id.to_string()));
     let update = cis2_tokens::is_paused.eq(paused);
 
-    let row_count =
-        diesel::update(cis2_tokens::table).filter(update_filter).set(update).execute(conn)?;
+    let row_count = diesel::update(cis2_tokens::table)
+        .filter(update_filter)
+        .set(update)
+        .execute(conn)?;
     assert_eq!(row_count, 1, "More than one row updated");
 
     Ok(())
@@ -311,7 +320,9 @@ pub fn update_sub_balance(
         assert_eq!(updated_rows, 1, "error: {} rows(s) updated", updated_rows);
 
         let delete_filter = update_filter.and(cis2_token_holders::balance.eq(BigDecimal::zero()));
-        diesel::delete(cis2_token_holders::table).filter(&delete_filter).execute(conn)?;
+        diesel::delete(cis2_token_holders::table)
+            .filter(&delete_filter)
+            .execute(conn)?;
 
         Ok(())
     })
@@ -466,7 +477,9 @@ pub fn delete_operator(conn: &mut DbConn, record: &Operator) -> DbResult<()> {
             .and(cis2_operators::operator_address.eq(&record.holder_address)),
     );
 
-    diesel::delete(cis2_operators::table).filter(delete_filter).execute(conn)?;
+    diesel::delete(cis2_operators::table)
+        .filter(delete_filter)
+        .execute(conn)?;
 
     Ok(())
 }
@@ -495,7 +508,9 @@ impl RecoveryRecord {
 }
 
 pub fn insert_recovery_record(conn: &mut DbConn, record: &RecoveryRecord) -> DbResult<()> {
-    diesel::insert_into(cis2_recovery_records::table).values(record).execute(conn)?;
+    diesel::insert_into(cis2_recovery_records::table)
+        .values(record)
+        .execute(conn)?;
 
     Ok(())
 }
@@ -561,7 +576,7 @@ pub fn list_deposits_by_holder(
     Ok((tokens, page_count))
 }
 
-pub fn insert_or_add_deposit_amount(conn: &mut DbConn, record: &Cis2Deposit) -> DbResult<()> {
+pub fn insert_or_inc_deposit_amount(conn: &mut DbConn, record: &Cis2Deposit) -> DbResult<()> {
     let row_count = diesel::insert_into(cis2_deposits::table)
         .values(record)
         .on_conflict((
@@ -597,7 +612,9 @@ pub fn update_sub_deposit_amount(conn: &mut DbConn, record: &Cis2Deposit) -> DbR
 
         let delete_filter =
             update_filter.and(cis2_deposits::deposited_amount.eq(BigDecimal::zero()));
-        diesel::delete(cis2_deposits::table).filter(delete_filter).execute(conn)?;
+        diesel::delete(cis2_deposits::table)
+            .filter(delete_filter)
+            .execute(conn)?;
 
         Ok(())
     })

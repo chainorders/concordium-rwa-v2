@@ -1,6 +1,9 @@
 use concordium_std::*;
 
-use super::{error::Error, event::Event, state::State, types::ContractResult};
+use super::error::Error;
+use super::event::Event;
+use super::state::State;
+use super::types::ContractResult;
 
 #[receive(
     contract = "rwa_compliance",
@@ -15,7 +18,10 @@ pub fn add_module(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(host.state().agents.contains(&ctx.sender()), Error::Unauthorized);
+    ensure!(
+        host.state().agents.contains(&ctx.sender()),
+        Error::Unauthorized
+    );
     let module: ContractAddress = ctx.parameter_cursor().get()?;
     host.state_mut().add_module(module);
     logger.log(&Event::ModuleAdded(module))?;
@@ -35,14 +41,21 @@ pub fn remove_module(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    ensure!(host.state().agents.contains(&ctx.sender()), Error::Unauthorized);
+    ensure!(
+        host.state().agents.contains(&ctx.sender()),
+        Error::Unauthorized
+    );
     let module: ContractAddress = ctx.parameter_cursor().get()?;
     host.state_mut().remove_module(&module);
     logger.log(&Event::ModuleRemoved(module))?;
     Ok(())
 }
 
-#[receive(contract = "rwa_compliance", name = "modules", return_value = "Vec<ContractAddress>")]
+#[receive(
+    contract = "rwa_compliance",
+    name = "modules",
+    return_value = "Vec<ContractAddress>"
+)]
 pub fn modules(_: &ReceiveContext, host: &Host<State>) -> ContractResult<Vec<ContractAddress>> {
     Ok(host.state().modules())
 }

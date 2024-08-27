@@ -1,6 +1,7 @@
 use concordium_std::*;
 
-use super::{state::State, types::*};
+use super::state::State;
+use super::types::*;
 
 #[receive(
     contract = "rwa_compliance_module_allowed_nationalities",

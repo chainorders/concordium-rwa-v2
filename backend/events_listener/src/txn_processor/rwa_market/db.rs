@@ -1,13 +1,17 @@
-use crate::schema::token_market::{
-    self, market_address, token_contract_address, token_listed_amount, token_unlisted_amount,
-};
+use std::ops::{Add, Sub};
+
 use bigdecimal::BigDecimal;
-use concordium_rust_sdk::{cis2, id::types::AccountAddress, types::ContractAddress};
+use concordium_rust_sdk::cis2;
+use concordium_rust_sdk::id::types::AccountAddress;
+use concordium_rust_sdk::types::ContractAddress;
 use concordium_rwa_backend_shared::db::{self, token_amount_to_sql, DbResult};
 use diesel::prelude::*;
 use log::debug;
 use num_traits::Zero;
-use std::ops::{Add, Sub};
+
+use crate::schema::token_market::{
+    self, market_address, token_contract_address, token_listed_amount, token_unlisted_amount,
+};
 
 #[derive(Selectable, Queryable, Identifiable, Insertable, Debug)]
 #[diesel(table_name = token_market)]
@@ -57,7 +61,10 @@ pub fn insert_or_inc_unlisted_supply(conn: &mut db::DbConn, token: &MarketToken)
                 .eq(token_unlisted_amount.add(token.token_unlisted_amount.clone())),
         )
         .execute(conn)?;
-    assert_eq!(updated_count, 1, "insert_or_inc_unlisted_supply: Updated row count should be 1");
+    assert_eq!(
+        updated_count, 1,
+        "insert_or_inc_unlisted_supply: Updated row count should be 1"
+    );
 
     Ok(())
 }
@@ -89,11 +96,18 @@ pub fn update_dec_unlisted_supply(
             .filter(update_filter)
             .set(update_query)
             .execute(conn)?;
-        let deleted_rows_count =
-            diesel::delete(token_market::table).filter(delete_filter).execute(conn)?;
+        let deleted_rows_count = diesel::delete(token_market::table)
+            .filter(delete_filter)
+            .execute(conn)?;
 
-        assert_eq!(updated_count, 1, "update_dec_unlisted_supply: Updated row count should be 1");
-        debug!("update_dec_listed_supply deleted {} row(s)", deleted_rows_count);
+        assert_eq!(
+            updated_count, 1,
+            "update_dec_unlisted_supply: Updated row count should be 1"
+        );
+        debug!(
+            "update_dec_listed_supply deleted {} row(s)",
+            deleted_rows_count
+        );
         Ok(())
     })
 }
@@ -124,11 +138,18 @@ pub fn update_dec_listed_supply(
             .filter(update_filter.clone())
             .set(update_query)
             .execute(conn)?;
-        let deleted_rows_count =
-            diesel::delete(token_market::table).filter(delete_filter).execute(conn)?;
+        let deleted_rows_count = diesel::delete(token_market::table)
+            .filter(delete_filter)
+            .execute(conn)?;
 
-        assert_eq!(updated_count, 1, "update_dec_listed_supply: Updated row count should be 1");
-        debug!("update_dec_listed_supply deleted {} row(s)", deleted_rows_count);
+        assert_eq!(
+            updated_count, 1,
+            "update_dec_listed_supply: Updated row count should be 1"
+        );
+        debug!(
+            "update_dec_listed_supply deleted {} row(s)",
+            deleted_rows_count
+        );
         Ok(())
     })
 }
@@ -155,7 +176,10 @@ pub fn update_unlisted_to_listed_supply(
         .filter(update_filter)
         .set(update_query)
         .execute(conn)?;
-    assert_eq!(updated_count, 1, "update_unlisted_to_listed_supply: Updated row count should be 1");
+    assert_eq!(
+        updated_count, 1,
+        "update_unlisted_to_listed_supply: Updated row count should be 1"
+    );
 
     Ok(())
 }
@@ -202,7 +226,10 @@ pub fn list_tokens(
         .limit(page_size)
         .select(MarketToken::as_select())
         .get_results(conn)?;
-    let count_total: i64 = token_market::table.filter(filter).count().get_result(conn)?;
+    let count_total: i64 = token_market::table
+        .filter(filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count_total + page_size - 1) / page_size;
 
     Ok((tokens, page_count))
@@ -225,7 +252,10 @@ pub fn list_tokens_by_owner(
         .limit(page_size)
         .select(MarketToken::as_select())
         .get_results(conn)?;
-    let count_total: i64 = token_market::table.filter(filter).count().get_result(conn)?;
+    let count_total: i64 = token_market::table
+        .filter(filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count_total + page_size - 1) / page_size;
 
     Ok((tokens, page_count))

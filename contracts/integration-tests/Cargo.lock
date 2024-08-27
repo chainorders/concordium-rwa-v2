@@ -548,6 +548,7 @@ version = "0.1.0"
 dependencies = [
  "concordium-cis2",
  "concordium-std",
+ "hex",
 ]
 
 [[package]]
@@ -588,6 +589,7 @@ name = "concordium-rwa-compliance"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
 ]
@@ -597,6 +599,7 @@ name = "concordium-rwa-identity-registry"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
 ]
@@ -606,35 +609,7 @@ name = "concordium-rwa-market"
 version = "0.1.0"
 dependencies = [
  "concordium-cis2",
- "concordium-rwa-utils",
- "concordium-std",
-]
-
-[[package]]
-name = "concordium-rwa-security-nft"
-version = "0.1.0"
-dependencies = [
- "concordium-cis2",
- "concordium-rwa-utils",
- "concordium-std",
- "hex",
-]
-
-[[package]]
-name = "concordium-rwa-security-sft"
-version = "0.1.0"
-dependencies = [
- "concordium-cis2",
- "concordium-rwa-utils",
- "concordium-std",
- "hex",
-]
-
-[[package]]
-name = "concordium-rwa-sponsor"
-version = "0.1.0"
-dependencies = [
- "concordium-cis2",
+ "concordium-protocols",
  "concordium-rwa-utils",
  "concordium-std",
 ]
@@ -646,7 +621,6 @@ dependencies = [
  "concordium-cis2",
  "concordium-protocols",
  "concordium-std",
- "hex",
 ]
 
 [[package]]
@@ -1411,12 +1385,10 @@ dependencies = [
  "concordium-rwa-compliance",
  "concordium-rwa-identity-registry",
  "concordium-rwa-market",
- "concordium-rwa-security-nft",
- "concordium-rwa-security-sft",
- "concordium-rwa-sponsor",
  "concordium-smart-contract-testing",
  "concordium-std",
  "rand_core",
+ "security-sft-rewards",
 ]
 
 [[package]]
@@ -2036,6 +2008,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "152e20a0fd0519390fc43ab404663af8a0b794273d2a91d60ad4a39f13ffe110"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "security-sft-rewards"
+version = "0.1.0"
+dependencies = [
+ "concordium-cis2",
+ "concordium-protocols",
+ "concordium-rwa-utils",
+ "concordium-std",
+ "hex",
 ]
 
 [[package]]

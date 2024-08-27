@@ -1,18 +1,20 @@
 use chrono::Utc;
-use concordium_rust_sdk::{
-    base::{
-        contracts_common::{NewReceiveNameError, ParseError, PublicKeyEd25519},
-        hashes::TransactionHash,
-        smart_contracts::{ExceedsParameterSize, OwnedContractName, OwnedParameter},
-        transactions::send::GivenEnergy,
-    },
-    common::types::{Amount, TransactionTime},
-    contract_client::{ContractClient, ContractTransactionMetadata},
-    types::{AccountInfo, Address, ContractAddress, Energy, RejectReason, WalletAccount},
-    v2::{self, BlockIdentifier},
+use concordium_rust_sdk::base::contracts_common::{
+    NewReceiveNameError, ParseError, PublicKeyEd25519,
 };
-use concordium_rwa_identity_registry::{identities::RegisterIdentityParams, types::Identity};
-use concordium_rwa_utils::common_types::{IdentityAttribute, IdentityCredential};
+use concordium_rust_sdk::base::hashes::TransactionHash;
+use concordium_rust_sdk::base::smart_contracts::{
+    ExceedsParameterSize, OwnedContractName, OwnedParameter,
+};
+use concordium_rust_sdk::base::transactions::send::GivenEnergy;
+use concordium_rust_sdk::common::types::{Amount, TransactionTime};
+use concordium_rust_sdk::contract_client::{ContractClient, ContractTransactionMetadata};
+use concordium_rust_sdk::types::{
+    AccountInfo, Address, ContractAddress, Energy, RejectReason, WalletAccount,
+};
+use concordium_rust_sdk::v2::{self, BlockIdentifier};
+use concordium_rwa_identity_registry::identities::RegisterIdentityParams;
+use concordium_rwa_identity_registry::types::{Identity, IdentityAttribute, IdentityCredential};
 
 use super::web3_id_utils::VerifyPresentationResponse;
 
@@ -77,9 +79,7 @@ impl IdentityRegistryClient {
             identity_registry,
             OwnedContractName::new_unchecked("init_rwa_identity_registry".to_owned()),
         );
-        Self {
-            client,
-        }
+        Self { client }
     }
 
     pub async fn is_agent(&mut self, agent: &Address) -> Result<bool, Error> {
@@ -136,10 +136,7 @@ impl IdentityRegistryClient {
         verification_response: VerifyPresentationResponse,
         energy: Energy,
     ) -> Result<TransactionHash, Error> {
-        let AccountInfo {
-            account_nonce,
-            ..
-        } = self
+        let AccountInfo { account_nonce, .. } = self
             .client
             .client
             .get_account_info(&agent.address.into(), BlockIdentifier::LastFinal)

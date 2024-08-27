@@ -65,9 +65,7 @@
 					"identity-registry/Cargo.toml",
 					"integration-tests/Cargo.toml",
 					"market/Cargo.toml",
-					"security-nft/Cargo.toml",
-					"security-sft/Cargo.toml",
-					"sponsor/Cargo.toml",
+					"security-sft-rewards/Cargo.toml",
 					"utils/Cargo.toml"
 				]
 			},
@@ -91,7 +89,8 @@
 				"bierner.github-markdown-preview",
 				"formulahendry.docker-extension-pack",
 				"inferrinizzard.prettier-sql-vscode",
-				"MS-CST-E.vscode-devskim"
+				"MS-CST-E.vscode-devskim",
+				"ms-vscode.live-server"
 			]
 		}
 	}

@@ -1,10 +1,8 @@
+use concordium_protocols::concordium_cis2_security::{compliance_client, CanTransferParam};
 use concordium_std::*;
 
-use super::{state::State, types::*};
-use concordium_rwa_utils::{
-    clients::compliance_client::{ComplianceContract, IComplianceClient},
-    compliance_types::*,
-};
+use super::state::State;
+use super::types::*;
 
 /// Handles the `can_transfer` event in the `rwa_compliance` contract.
 ///
@@ -23,12 +21,7 @@ fn can_transfer(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool
     let state = host.state();
 
     for module in state.modules.iter() {
-        let can_transfer = ComplianceContract(module.to_owned()).can_transfer(
-            host,
-            params.token_id.clone(),
-            params.to,
-            params.amount,
-        )?;
+        let can_transfer = compliance_client::can_transfer(host, module.to_owned(), &params)?;
 
         if !can_transfer {
             return Ok(false);

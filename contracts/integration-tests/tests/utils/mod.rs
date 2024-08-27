@@ -1,15 +1,12 @@
-pub mod chain;
+pub mod cis2;
 pub mod cis2_conversions;
-pub mod cis2_security_test_contract;
-pub mod cis2_test_contract;
-pub mod common;
+pub mod cis2_security;
+pub mod cis2_security_rewards;
 pub mod compliance;
-pub mod consts;
 pub mod euroe;
 pub mod identity_registry;
 pub mod market;
-pub mod security_nft;
-pub mod security_sft;
-pub mod sponsor;
-pub mod test_contract_client;
-pub mod verifier;
+pub mod sft_security;
+
+use concordium_smart_contract_testing::Energy;
+const MAX_ENERGY: Energy = Energy { energy: 30000 };

@@ -1,60 +1,83 @@
-use super::test_contract_client::*;
-pub use concordium_rwa_compliance::{
-    compliance::init::InitParams as ComplianceInitParams,
-    compliance_modules::allowed_nationalities::init::InitParams as ComplianceModuleInitParams,
-};
 use concordium_smart_contract_testing::*;
-pub const COMPLIANCE_MODULE_CONTRACT_NAME: &str =
-    "init_rwa_compliance_module_allowed_nationalities";
-pub const COMPLIANCE_CONTRACT_NAME: &str = "init_rwa_compliance";
 
-pub trait IComplianceModule: ITestModule {
-    fn rwa_compliance(&self) -> GenericInit<ComplianceInitParams> {
-        GenericInit::<ComplianceInitParams, ()>::new(self.module_ref(), COMPLIANCE_CONTRACT_NAME)
-    }
+use super::MAX_ENERGY;
+const MODULE_PATH: &str = "../compliance/contract.wasm.v1";
 
-    fn rwa_compliance_module_allowed_nationalities(
-        &self,
-    ) -> GenericInit<ComplianceModuleInitParams> {
-        GenericInit::<ComplianceModuleInitParams, ()>::new(
-            self.module_ref(),
-            COMPLIANCE_MODULE_CONTRACT_NAME,
+pub fn deploy_module(chain: &mut Chain, sender: &Account) -> ModuleDeploySuccess {
+    chain
+        .module_deploy_v1(
+            Signer::with_one_key(),
+            sender.address,
+            module_load_v1(MODULE_PATH).unwrap(),
         )
+        .expect("deploying module")
+}
+
+pub fn init(
+    chain: &mut Chain,
+    sender: &Account,
+    compliance_modules: Vec<ContractAddress>,
+) -> ContractInitSuccess {
+    chain
+        .contract_init(
+            Signer::with_one_key(),
+            sender.address,
+            MAX_ENERGY,
+            InitContractPayload {
+                amount:    Amount::zero(),
+                init_name: OwnedContractName::new_unchecked("init_rwa_compliance".to_string()),
+                mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
+                param:     OwnedParameter::from_serial(
+                    &concordium_rwa_compliance::compliance::init::InitParams {
+                        modules: compliance_modules,
+                    },
+                )
+                .unwrap(),
+            },
+        )
+        .expect("init")
+}
+
+pub fn init_all(
+    chain: &mut Chain,
+    sender: &Account,
+    identity_registry: ContractAddress,
+    nationalities: Vec<String>,
+) -> ContractInitSuccess {
+    let compliance_module = nationalities_module::init(
+        chain,
+        sender,
+        &concordium_rwa_compliance::compliance_modules::allowed_nationalities::init::InitParams {
+            nationalities,
+            identity_registry,
+        },
+    )
+    .contract_address;
+    init(chain, sender, vec![compliance_module])
+}
+
+pub mod nationalities_module {
+    use concordium_rwa_compliance::compliance_modules::allowed_nationalities::init::InitParams;
+    use concordium_smart_contract_testing::*;
+
+    use super::MODULE_PATH;
+    use crate::utils::MAX_ENERGY;
+
+    pub fn init(chain: &mut Chain, sender: &Account, param: &InitParams) -> ContractInitSuccess {
+        chain
+            .contract_init(
+                Signer::with_one_key(),
+                sender.address,
+                MAX_ENERGY,
+                InitContractPayload {
+                    amount:    Amount::zero(),
+                    init_name: OwnedContractName::new_unchecked(
+                        "init_rwa_compliance_module_allowed_nationalities".to_string(),
+                    ),
+                    mod_ref:   module_load_v1(MODULE_PATH).unwrap().get_module_ref(),
+                    param:     OwnedParameter::from_serial(param).unwrap(),
+                },
+            )
+            .expect("init")
     }
 }
-pub trait IComplianceContract: ITestContract {}
-pub trait IComplianceModuleContract: ITestContract {}
-
-pub struct ComplianceModule {
-    pub module_path: String,
-}
-
-impl ITestModule for ComplianceModule {
-    fn module_path(&self) -> String { self.module_path.to_owned() }
-}
-
-impl IComplianceModule for ComplianceModule {}
-
-pub struct ComplianceContract(pub ContractAddress);
-
-impl ITestContract for ComplianceContract {
-    fn contract_name() -> OwnedContractName {
-        OwnedContractName::new_unchecked(COMPLIANCE_CONTRACT_NAME.to_owned())
-    }
-
-    fn contract_address(&self) -> ContractAddress { self.0 }
-}
-
-impl IComplianceContract for ComplianceContract {}
-
-pub struct ComplianceModuleContract(pub ContractAddress);
-
-impl ITestContract for ComplianceModuleContract {
-    fn contract_name() -> OwnedContractName {
-        OwnedContractName::new_unchecked(COMPLIANCE_MODULE_CONTRACT_NAME.to_owned())
-    }
-
-    fn contract_address(&self) -> ContractAddress { self.0 }
-}
-
-impl IComplianceModuleContract for ComplianceModuleContract {}

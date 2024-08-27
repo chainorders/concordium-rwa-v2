@@ -1,10 +1,11 @@
-use crate::schema::{
-    identity_registry_agents, identity_registry_identities, identity_registry_issuers,
-};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use concordium_rust_sdk::types::{Address, ContractAddress};
 use concordium_rwa_backend_shared::db::{DbConn, DbResult};
 use diesel::prelude::*;
+
+use crate::schema::{
+    identity_registry_agents, identity_registry_identities, identity_registry_issuers,
+};
 
 #[derive(Selectable, Queryable, Identifiable, Insertable, Debug, PartialEq)]
 #[diesel(table_name = identity_registry_identities)]
@@ -45,15 +46,19 @@ pub fn list_identities(
         .limit(page_size)
         .offset(page_size * page)
         .get_results(conn)?;
-    let count: i64 =
-        identity_registry_identities::table.filter(select_filter).count().get_result(conn)?;
+    let count: i64 = identity_registry_identities::table
+        .filter(select_filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count + page_size - 1) / page_size;
 
     Ok((res, page_count))
 }
 
 pub fn insert_identity(conn: &mut DbConn, identity: Identity) -> DbResult<usize> {
-    diesel::insert_into(identity_registry_identities::table).values(identity).execute(conn)
+    diesel::insert_into(identity_registry_identities::table)
+        .values(identity)
+        .execute(conn)
 }
 
 pub fn remove_identity(conn: &mut DbConn, address: &Address) -> DbResult<usize> {
@@ -103,15 +108,19 @@ pub fn list_issuers(
         .limit(page_size)
         .offset(page_size * page)
         .get_results(conn)?;
-    let count: i64 =
-        identity_registry_issuers::table.filter(select_filter).count().get_result(conn)?;
+    let count: i64 = identity_registry_issuers::table
+        .filter(select_filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count + page_size - 1) / page_size;
 
     Ok((res, page_count))
 }
 
 pub fn insert_issuer(conn: &mut DbConn, issuer: Issuer) -> DbResult<usize> {
-    diesel::insert_into(identity_registry_issuers::table).values(issuer).execute(conn)
+    diesel::insert_into(identity_registry_issuers::table)
+        .values(issuer)
+        .execute(conn)
 }
 
 pub fn remove_issuer(
@@ -119,13 +128,16 @@ pub fn remove_issuer(
     identity_registry_address: &ContractAddress,
     issuer_address: &ContractAddress,
 ) -> DbResult<usize> {
-    let delete_filter =
-        identity_registry_issuers::issuer_address.eq(issuer_address.to_string()).and(
+    let delete_filter = identity_registry_issuers::issuer_address
+        .eq(issuer_address.to_string())
+        .and(
             identity_registry_issuers::identity_registry_address
                 .eq(identity_registry_address.to_string()),
         );
 
-    diesel::delete(identity_registry_issuers::table).filter(delete_filter).execute(conn)
+    diesel::delete(identity_registry_issuers::table)
+        .filter(delete_filter)
+        .execute(conn)
 }
 
 #[derive(Selectable, Queryable, Identifiable, Insertable, Debug, PartialEq)]
@@ -167,15 +179,19 @@ pub fn list_agents(
         .limit(page_size)
         .offset(page_size * page)
         .get_results(conn)?;
-    let count: i64 =
-        identity_registry_agents::table.filter(select_filter).count().get_result(conn)?;
+    let count: i64 = identity_registry_agents::table
+        .filter(select_filter)
+        .count()
+        .get_result(conn)?;
     let page_count = (count + page_size - 1) / page_size;
 
     Ok((res, page_count))
 }
 
 pub fn insert_agent(conn: &mut DbConn, agent: Agent) -> DbResult<usize> {
-    diesel::insert_into(identity_registry_agents::table).values(agent).execute(conn)
+    diesel::insert_into(identity_registry_agents::table)
+        .values(agent)
+        .execute(conn)
 }
 
 pub fn remove_agent(
@@ -183,10 +199,14 @@ pub fn remove_agent(
     identity_registry_address: &ContractAddress,
     agent_address: &Address,
 ) -> DbResult<usize> {
-    let delete_filter = identity_registry_agents::agent_address.eq(agent_address.to_string()).and(
-        identity_registry_agents::identity_registry_address
-            .eq(identity_registry_address.to_string()),
-    );
+    let delete_filter = identity_registry_agents::agent_address
+        .eq(agent_address.to_string())
+        .and(
+            identity_registry_agents::identity_registry_address
+                .eq(identity_registry_address.to_string()),
+        );
 
-    diesel::delete(identity_registry_agents::table).filter(delete_filter).execute(conn)
+    diesel::delete(identity_registry_agents::table)
+        .filter(delete_filter)
+        .execute(conn)
 }

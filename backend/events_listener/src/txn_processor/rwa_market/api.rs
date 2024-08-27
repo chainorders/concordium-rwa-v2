@@ -21,15 +21,19 @@
 //!
 //! The `to_paged_response` method is a helper method used by the above methods
 //! to convert the query result into a paged response.
-use super::db;
-use concordium_rust_sdk::{id::types::AccountAddress, types::ContractAddress};
-use concordium_rwa_backend_shared::{
-    api::{ApiContractAddress, Error, PagedResponse, PAGE_SIZE},
-    db::DbPool,
-};
-use poem::{web::Data, Result};
-use poem_openapi::{param::Path, payload::Json, Object, OpenApi};
 use std::ops::Add;
+
+use concordium_rust_sdk::id::types::AccountAddress;
+use concordium_rust_sdk::types::ContractAddress;
+use concordium_rwa_backend_shared::api::{ApiContractAddress, Error, PagedResponse, PAGE_SIZE};
+use concordium_rwa_backend_shared::db::DbPool;
+use poem::web::Data;
+use poem::Result;
+use poem_openapi::param::Path;
+use poem_openapi::payload::Json;
+use poem_openapi::{Object, OpenApi};
+
+use super::db;
 
 #[derive(Object)]
 pub struct MarketToken {
@@ -43,9 +47,14 @@ pub struct MarketToken {
 
 impl From<db::MarketToken> for MarketToken {
     fn from(value: db::MarketToken) -> Self {
-        let deposited_amount = value.token_listed_amount.clone().add(&value.token_unlisted_amount);
-        let token_contract: ContractAddress =
-            value.token_contract_address.parse().expect("Error parsing token contract address");
+        let deposited_amount = value
+            .token_listed_amount
+            .clone()
+            .add(&value.token_unlisted_amount);
+        let token_contract: ContractAddress = value
+            .token_contract_address
+            .parse()
+            .expect("Error parsing token contract address");
 
         Self {
             token_contract:   ApiContractAddress::from_contract_address(token_contract),
@@ -83,10 +92,7 @@ impl RwaMarketApi {
         Path(subindex): Path<u64>,
         Path(page): Path<i64>,
     ) -> Result<Json<PagedResponse<MarketToken>>, Error> {
-        let market_contract = &ContractAddress {
-            index,
-            subindex,
-        };
+        let market_contract = &ContractAddress { index, subindex };
         let mut conn = pool.get()?;
         let (tokens, page_count) = db::list_tokens(&mut conn, market_contract, PAGE_SIZE, page)?;
         let tokens = tokens.into_iter().map(|t| t.into()).collect();
@@ -111,7 +117,10 @@ impl RwaMarketApi {
     /// # Returns
     ///
     /// A `PagedResponse` containing a list of `MarketToken` objects.
-    #[oai(path = "/rwa-market/:index/:subindex/unlisted/:owner/:page", method = "get")]
+    #[oai(
+        path = "/rwa-market/:index/:subindex/unlisted/:owner/:page",
+        method = "get"
+    )]
     pub async fn unlisted(
         &self,
         Data(pool): Data<&DbPool>,
@@ -120,10 +129,7 @@ impl RwaMarketApi {
         Path(owner): Path<String>,
         Path(page): Path<i64>,
     ) -> Result<Json<PagedResponse<MarketToken>>, Error> {
-        let market_contract = &ContractAddress {
-            index,
-            subindex,
-        };
+        let market_contract = &ContractAddress { index, subindex };
         let owner: AccountAddress = owner.parse()?;
         let mut conn = pool.get()?;
         let (tokens, page_count) =
@@ -150,7 +156,10 @@ impl RwaMarketApi {
     /// # Returns
     ///
     /// A `PagedResponse` containing a list of `MarketToken` objects.
-    #[oai(path = "/rwa-market/:index/:subindex/deposited/:owner/:page", method = "get")]
+    #[oai(
+        path = "/rwa-market/:index/:subindex/deposited/:owner/:page",
+        method = "get"
+    )]
     pub async fn deposited(
         &self,
         Data(pool): Data<&DbPool>,
@@ -159,10 +168,7 @@ impl RwaMarketApi {
         Path(owner): Path<String>,
         Path(page): Path<i64>,
     ) -> Result<Json<PagedResponse<MarketToken>>, Error> {
-        let market_contract = &ContractAddress {
-            index,
-            subindex,
-        };
+        let market_contract = &ContractAddress { index, subindex };
         let owner: AccountAddress = owner.parse()?;
         let mut conn = pool.get()?;
         let (tokens, page_count) =

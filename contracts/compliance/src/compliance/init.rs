@@ -1,11 +1,9 @@
-use concordium_rwa_utils::agents_state::IsAgentsState;
+use concordium_rwa_utils::state_implementations::agents_state::IsAgentsState;
 use concordium_std::*;
 
-use super::{
-    event::Event,
-    state::State,
-    types::{ContractResult, Module},
-};
+use super::event::Event;
+use super::state::State;
+use super::types::{ContractResult, Module};
 
 #[derive(Serialize, SchemaType)]
 pub struct InitParams {

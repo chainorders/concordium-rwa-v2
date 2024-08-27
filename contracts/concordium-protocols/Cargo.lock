@@ -53,6 +53,7 @@ version = "0.1.0"
 dependencies = [
  "concordium-cis2",
  "concordium-std",
+ "hex",
 ]
 
 [[package]]
