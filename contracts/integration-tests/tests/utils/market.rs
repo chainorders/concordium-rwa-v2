@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use concordium_cis2::TokenAmountU64;
 use concordium_rwa_market::deposit::DepositParams;
 use concordium_rwa_market::exchange::{Amounts, ExchangeParams};

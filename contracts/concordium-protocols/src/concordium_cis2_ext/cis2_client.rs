@@ -10,7 +10,7 @@ use crate::contract_client::{invoke_contract, invoke_contract_read_only, Contrac
 
 pub fn token_metadata<T: IsTokenId, State: Serial+DeserialWithState<ExternStateApi>>(
     host: &Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     params: &TokenMetadataQueryParams<T>,
 ) -> Result<TokenMetadataQueryResponse, ContractClientError<()>> {
     invoke_contract_read_only(
@@ -23,7 +23,7 @@ pub fn token_metadata<T: IsTokenId, State: Serial+DeserialWithState<ExternStateA
 
 pub fn token_metadata_single<T: IsTokenId, State: Serial+DeserialWithState<ExternStateApi>>(
     host: &Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     token_id: T,
 ) -> Result<MetadataUrl, ContractClientError<()>> {
     let params = TokenMetadataQueryParams {
@@ -36,7 +36,7 @@ pub fn token_metadata_single<T: IsTokenId, State: Serial+DeserialWithState<Exter
 
 pub fn transfer<T: IsTokenId, A: IsTokenAmount, State: Serial+DeserialWithState<ExternStateApi>>(
     host: &mut Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     params: &TransferParams<T, A>,
 ) -> Result<(), ContractClientError<()>> {
     invoke_contract(
@@ -53,7 +53,7 @@ pub fn transfer_single<
     State: Serial+DeserialWithState<ExternStateApi>,
 >(
     host: &mut Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     param: Transfer<T, A>,
 ) -> Result<(), ContractClientError<()>> {
     let params = TransferParams(vec![param]);

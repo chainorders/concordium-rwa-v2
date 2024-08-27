@@ -1,10 +1,10 @@
 use concordium_protocols::concordium_cis2_security::AgentUpdatedEvent;
-use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
 use concordium_std::*;
 
 use super::error::Error;
 use super::state::State;
-use super::types::{Agent, AgentRole, ContractResult, Event};
+use super::types::{Agent, ContractResult, Event};
+use crate::state::{AddressState, AgentState};
 /// Returns true if the given address is an agent.
 ///
 /// # Returns
@@ -19,18 +19,11 @@ use super::types::{Agent, AgentRole, ContractResult, Event};
 )]
 pub fn is_agent(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool> {
     let agent: Agent = ctx.parameter_cursor().get()?;
-    Ok(host.state().is_agent(&agent.address, agent.roles))
-}
-
-#[receive(
-    contract = "security_sft_rewards",
-    name = "agents",
-    return_value = "Vec<Agent>",
-    error = "Error"
-)]
-/// Returns the list of agents.
-pub fn agents(_ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<Vec<Agent>> {
-    Ok(host.state().list_agents())
+    let is_agent = host
+        .state()
+        .address(&agent.address)
+        .is_some_and(|a| a.is_agent(&agent.roles));
+    Ok(is_agent)
 }
 
 /// Adds the given address as an agent.
@@ -57,18 +50,14 @@ pub fn add_agent(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let params: Agent = ctx.parameter_cursor().get()?;
-    let (state, state_builder) = host.state_and_builder();
     ensure!(
-        state.is_agent(
-            &ctx.sender(),
-            [params.roles.as_slice(), &[AgentRole::AddAgent]].concat(),
-        ),
+        ctx.sender().matches_account(&ctx.owner()),
         Error::Unauthorized
     );
-    ensure!(
-        state.add_agent(params.to_owned(), state_builder),
-        Error::AgentAlreadyExists
-    );
+    host.state_mut().add_address(
+        params.address,
+        AddressState::Agent(AgentState(params.roles.clone())),
+    )?;
     logger.log(&Event::AgentAdded(AgentUpdatedEvent {
         agent: params.address,
         roles: params.roles,
@@ -104,16 +93,12 @@ pub fn remove_agent(
         Error::Unauthorized
     );
     let address: Address = ctx.parameter_cursor().get()?;
-    let agent: Option<Agent> = host.state_mut().remove_agent(&address);
-    match agent {
-        None => bail!(Error::AgentNotFound),
-        Some(agent) => {
-            logger.log(&Event::AgentRemoved(AgentUpdatedEvent {
-                agent: agent.address,
-                roles: agent.roles,
-            }))?;
-        }
-    };
+    let state = host.state_mut().remove_and_get_address(&address)?;
+    let agent = state.agent().ok_or(Error::InvalidAddress)?;
+    logger.log(&Event::AgentRemoved(AgentUpdatedEvent {
+        agent: address,
+        roles: agent.roles().clone(),
+    }))?;
 
     Ok(())
 }

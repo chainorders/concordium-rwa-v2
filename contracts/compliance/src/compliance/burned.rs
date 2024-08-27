@@ -20,19 +20,19 @@ use super::types::*;
     contract = "rwa_compliance",
     name = "burned",
     parameter = "BurnedParam<TokenId, TokenAmount>",
-    error = "super::error::Error"
+    error = "super::error::Error",
+    mutable
 )]
-fn burned(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<()> {
+fn burned(ctx: &ReceiveContext, host: &mut Host<State>) -> ContractResult<()> {
     let params: BurnedParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
     ensure!(
         ctx.sender().matches_contract(&params.token_id.contract),
         Error::Unauthorized
     );
 
-    let state = host.state();
-
-    for module in state.modules.iter() {
-        compliance_client::burned(host, module.to_owned(), &params)?;
+    let modules = host.state().modules();
+    for module in modules {
+        compliance_client::burned(host, &module, &params)?;
     }
 
     Ok(())

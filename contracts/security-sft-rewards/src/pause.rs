@@ -1,7 +1,4 @@
 use concordium_protocols::concordium_cis2_security::Paused;
-use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
-use concordium_rwa_utils::state_implementations::tokens_security_state::ITokensSecurityState;
-use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
 use concordium_std::*;
 
 use super::error::*;
@@ -33,14 +30,19 @@ pub fn pause(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let state = host.state_mut();
-    ensure!(
-        state.is_agent(&ctx.sender(), vec![AgentRole::Pause]),
-        Error::Unauthorized
-    );
+    let is_authorized = state
+        .address(&ctx.sender())
+        .is_some_and(|a| a.is_agent(&[AgentRole::Pause]));
+    ensure!(is_authorized, Error::Unauthorized);
+
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
     for token_id in tokens {
-        ensure!(token_id.eq(&state.tracked_token_id), Error::InvalidTokenId);
-        state.pause(token_id)?;
+        state
+            .token_mut(&token_id)
+            .ok_or(Error::InvalidTokenId)?
+            .main_mut()
+            .ok_or(Error::InvalidTokenId)?
+            .pause();
         logger.log(&Event::Paused(Paused { token_id }))?;
     }
 
@@ -72,14 +74,19 @@ pub fn un_pause(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let state = host.state_mut();
-    ensure!(
-        state.is_agent(&ctx.sender(), vec![AgentRole::UnPause]),
-        Error::Unauthorized
-    );
+    let is_authorized = state
+        .address(&ctx.sender())
+        .is_some_and(|a| a.is_agent(&[AgentRole::UnPause]));
+    ensure!(is_authorized, Error::Unauthorized);
+
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
     for token_id in tokens {
-        ensure!(token_id.eq(&state.tracked_token_id), Error::InvalidTokenId);
-        state.un_pause(token_id)?;
+        state
+            .token_mut(&token_id)
+            .ok_or(Error::InvalidTokenId)?
+            .main_mut()
+            .ok_or(Error::InvalidTokenId)?
+            .un_pause();
         logger.log(&Event::UnPaused(Paused { token_id }))?;
     }
 
@@ -111,8 +118,11 @@ pub fn is_paused(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<IsP
 
     let state = host.state();
     for token_id in tokens {
-        state.ensure_token_exists(&token_id)?;
-        res.tokens.push(state.is_paused(&token_id))
+        let is_paused = match state.token(&token_id).ok_or(Error::InvalidTokenId)?.main() {
+            None => false,
+            Some(token) => token.paused,
+        };
+        res.tokens.push(is_paused);
     }
 
     Ok(res)

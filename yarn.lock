@@ -97,6 +97,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"concordium-security-sft-single@workspace:contracts/security-sft-single":
+  version: 0.0.0-use.local
+  resolution: "concordium-security-sft-single@workspace:contracts/security-sft-single"
+  languageName: unknown
+  linkType: soft
+
 "contracts@workspace:contracts":
   version: 0.0.0-use.local
   resolution: "contracts@workspace:contracts"

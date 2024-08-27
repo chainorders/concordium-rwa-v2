@@ -1,5 +1,4 @@
-use concordium_rwa_utils::state_implementations::holders_state::IHoldersState;
-use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
+use concordium_protocols::concordium_cis2_ext::IsTokenAmount;
 use concordium_std::*;
 
 use super::error::Error;
@@ -25,14 +24,24 @@ pub fn balance_of(
     host: &Host<State>,
 ) -> ContractResult<BalanceOfQueryResponse> {
     let BalanceOfQueryParams { queries } = ctx.parameter_cursor().get()?;
+    let mut res: Vec<TokenAmount> = Vec::with_capacity(queries.len());
     let state = host.state();
-    let res: Result<Vec<TokenAmount>, Error> = queries
-        .iter()
-        .map(|q| {
-            state.ensure_token_exists(&q.token_id)?;
-            Ok(state.balance_of(&q.address, &q.token_id))
-        })
-        .collect();
-
-    Ok(concordium_cis2::BalanceOfQueryResponse(res?))
+    for query in queries {
+        state.token(&query.token_id).ok_or(Error::InvalidTokenId)?;
+        let balance: TokenAmount = match state.address(&query.address) {
+            None => TokenAmount::zero(),
+            Some(address) => match address.holder() {
+                None => TokenAmount::zero(),
+                Some(holder) => match holder.active() {
+                    None => TokenAmount::zero(),
+                    Some(holder_state) => holder_state
+                        .balance(&query.token_id)
+                        .map(|b| b.total())
+                        .unwrap_or(TokenAmount::zero()),
+                },
+            },
+        };
+        res.push(balance);
+    }
+    Ok(concordium_cis2::BalanceOfQueryResponse(res))
 }

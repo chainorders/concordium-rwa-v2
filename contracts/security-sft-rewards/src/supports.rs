@@ -3,7 +3,6 @@ use concordium_cis2::{
     CIS0_STANDARD_IDENTIFIER, CIS2_STANDARD_IDENTIFIER,
 };
 use concordium_protocols::concordium_cis3::CIS3_STANDARD_IDENTIFIER;
-use concordium_rwa_utils::state_implementations::sponsors_state::ISponsorsState;
 use concordium_std::*;
 
 use super::state::State;
@@ -33,14 +32,16 @@ const SUPPORTS_STANDARDS: [StandardIdentifier<'static>; 2] =
 fn supports(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<SupportsQueryResponse> {
     let params: SupportsQueryParams = ctx.parameter_cursor().get()?;
     let mut response = Vec::with_capacity(params.queries.len());
+    let state = host.state();
     for std_id in params.queries {
         if SUPPORTS_STANDARDS.contains(&std_id.as_standard_identifier()) {
             response.push(SupportResult::Support);
         } else if std_id
             .as_standard_identifier()
             .eq(&CIS3_STANDARD_IDENTIFIER)
+            && state.sponsor.is_some()
         {
-            response.push(SupportResult::SupportBy(host.state().list_sponsors()));
+            response.push(SupportResult::SupportBy(vec![state.sponsor.unwrap()]));
         } else {
             response.push(SupportResult::NoSupport)
         }

@@ -1,11 +1,8 @@
-use concordium_cis2::{AdditionalData, Cis2Event, MintEvent, OnReceivingCis2Params, Receiver};
+use concordium_cis2::{Cis2Event, MintEvent};
 use concordium_protocols::concordium_cis2_ext::IsTokenAmount;
 use concordium_protocols::concordium_cis2_security::{
     compliance_client, identity_registry_client, CanTransferParam, MintedParam, TokenUId,
 };
-use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
-use concordium_rwa_utils::state_implementations::cis2_security_state::ICis2SecurityState;
-use concordium_rwa_utils::state_implementations::rewards_state::IRewardsState;
 use concordium_std::*;
 
 use super::error::*;
@@ -17,7 +14,7 @@ use super::types::*;
     name = "mint",
     enable_logger,
     mutable,
-    parameter = "MintParam",
+    parameter = "MintParams",
     error = "Error"
 )]
 pub fn mint(
@@ -26,71 +23,79 @@ pub fn mint(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let self_address = ctx.self_address();
-    let params: MintParam = ctx.parameter_cursor().get()?;
-    let can_mint = host.state().is_agent(&ctx.sender(), vec![AgentRole::Mint]);
-    ensure!(can_mint, Error::Unauthorized);
+    let params: MintParams = ctx.parameter_cursor().get()?;
 
     let state = host.state();
-    let owner_address = params.owner.address();
-    let compliance = state.compliance();
-    let token_id = params.token_id;
-    let mint_amount = params.amount;
+    let is_authorized = state
+        .address(&ctx.sender())
+        .is_some_and(|a| a.is_agent(&[AgentRole::Mint]));
+    ensure!(is_authorized, Error::Unauthorized);
 
-    ensure!(mint_amount.gt(&TokenAmount::zero()), Error::InvalidAmount);
-    // Ensure that the owner is verified
-    ensure!(
-        identity_registry_client::is_verified(host, state.identity_registry(), &owner_address)?,
-        Error::UnVerifiedIdentity
-    );
+    let compliance = state.compliance;
+    let identity_registry_client = state.identity_registry;
+    let (_, max_reward_token_id) = state.rewards_ids_range;
 
-    let compliance_token = TokenUId::new(token_id, self_address);
-    let compliance_can_transfer =
-        compliance_client::can_transfer(host, compliance, &CanTransferParam {
-            token_id: compliance_token,
-            amount:   mint_amount,
-            to:       owner_address,
+    for MintParam {
+        address: owner,
+        amount,
+    } in params.owners
+    {
+        let owner = Address::Account(owner);
+        ensure!(amount.gt(&TokenAmount::zero()), Error::InvalidAmount);
+        ensure!(
+            identity_registry_client::is_verified(host, &identity_registry_client, &owner)?,
+            Error::UnVerifiedIdentity
+        );
+        let compliance_token = TokenUId::new(params.token_id, self_address);
+        let compliance_can_transfer =
+            compliance_client::can_transfer(host, &compliance, &CanTransferParam {
+                token_id: compliance_token,
+                amount,
+                to: owner,
+            })?;
+        ensure!(compliance_can_transfer, Error::InCompliantTransfer);
+
+        let (state, state_builder) = host.state_and_builder();
+        {
+            // Mint tokens
+            let mut address = state.address_or_insert_holder(&owner, state_builder);
+            let holder = address.holder_mut().ok_or(Error::InvalidAddress)?;
+            let active_holder = holder.active_mut().ok_or(Error::RecoveredAddress)?;
+            active_holder.add_assign_balance(&params.token_id, amount);
+            active_holder.add_assign_balance(&max_reward_token_id, amount);
+        }
+        {
+            // Update minted supply
+            state
+                .token_mut(&params.token_id)
+                .ok_or(Error::InvalidTokenId)?
+                .main_mut()
+                .ok_or(Error::InvalidTokenId)?
+                .add_assign_supply(amount)?;
+            state
+                .token_mut(&max_reward_token_id)
+                .ok_or(Error::InvalidTokenId)?
+                .reward_mut()
+                .ok_or(Error::InvalidTokenId)?
+                .add_assign_supply(amount);
+        }
+
+        compliance_client::minted(host, &compliance, &MintedParam {
+            token_id: TokenUId::new(params.token_id, self_address),
+            amount,
+            owner,
         })?;
-    ensure!(compliance_can_transfer, Error::InCompliantTransfer);
 
-    // Minting Logic
-    let (state, state_builder) = host.state_and_builder();
-    ensure!(token_id.eq(&state.tracked_token_id), Error::InvalidTokenId);
-
-    state.mint(&token_id, &mint_amount, &owner_address, state_builder)?;
-    let reward_token_id = state.mint_rewards(&owner_address, &mint_amount, state_builder)?;
-    // Notify compliance that the token has been minted
-    compliance_client::minted(host, compliance, &MintedParam {
-        token_id: compliance_token,
-        amount:   mint_amount,
-        owner:    owner_address,
-    })?;
-    // Log the mint event
-    logger.log(&Event::Cis2(Cis2Event::Mint(MintEvent {
-        token_id,
-        amount: mint_amount,
-        owner: owner_address,
-    })))?;
-    logger.log(&Event::Cis2(Cis2Event::Mint(MintEvent {
-        token_id: reward_token_id,
-        amount:   mint_amount,
-        owner:    owner_address,
-    })))?;
-    // If the receiver is a contract: invoke the receive hook function.
-    if let Receiver::Contract(address, function) = &params.owner {
-        let parameter = OnReceivingCis2Params {
-            token_id,
-            amount: mint_amount,
-            // From self because the minting is being done from deposited tokens in custody of the
-            // current contract
-            from: self_address.into(),
-            data: AdditionalData::empty(),
-        };
-        host.invoke_contract(
-            address,
-            &parameter,
-            function.as_entrypoint_name(),
-            Amount::zero(),
-        )?;
+        logger.log(&Event::Cis2(Cis2Event::Mint(MintEvent {
+            token_id: params.token_id,
+            amount,
+            owner,
+        })))?;
+        logger.log(&Event::Cis2(Cis2Event::Mint(MintEvent {
+            token_id: max_reward_token_id,
+            amount,
+            owner,
+        })))?;
     }
 
     Ok(())

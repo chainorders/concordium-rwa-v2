@@ -1,5 +1,4 @@
 use concordium_cis2::*;
-use concordium_rwa_utils::state_implementations::holders_state::IHoldersState;
 use concordium_std::*;
 
 use super::error::Error;
@@ -21,7 +20,7 @@ use super::types::{ContractResult, Event};
     mutable,
     enable_logger,
     parameter = "UpdateOperatorParams",
-    error = "super::error::Error"
+    error = "Error"
 )]
 pub fn update_operator(
     ctx: &ReceiveContext,
@@ -29,13 +28,17 @@ pub fn update_operator(
     logger: &mut Logger,
 ) -> ContractResult<()> {
     let UpdateOperatorParams { 0: updates }: UpdateOperatorParams = ctx.parameter_cursor().get()?;
-    let (state, state_builder) = host.state_and_builder();
     let sender = ctx.sender();
-    ensure!(sender.is_account(), Error::InvalidAddress);
+    let (state, state_builder) = host.state_and_builder();
+
     for UpdateOperator { operator, update } in updates {
+        let mut holder = state.address_or_insert_holder(&sender, state_builder);
+        let holder = holder.holder_mut().ok_or(Error::InvalidAddress)?;
+        let holder = holder.active_mut().ok_or(Error::RecoveredAddress)?;
+
         match update {
-            OperatorUpdate::Add => state.add_operator(sender, operator, state_builder),
-            OperatorUpdate::Remove => state.remove_operator(sender, &operator),
+            OperatorUpdate::Add => holder.add_operator(operator),
+            OperatorUpdate::Remove => holder.remove_operator(&operator),
         }
         logger.log(&Event::Cis2(Cis2Event::UpdateOperator(
             UpdateOperatorEvent {
@@ -69,9 +72,16 @@ pub fn operator_of(
 ) -> ContractResult<OperatorOfQueryResponse> {
     let OperatorOfQueryParams { queries }: OperatorOfQueryParams = ctx.parameter_cursor().get()?;
     let state = host.state();
-    let res: Vec<bool> = queries
-        .iter()
-        .map(|q| state.is_operator(&q.owner, &q.address))
-        .collect();
+    let mut res = Vec::with_capacity(queries.len());
+
+    for query in queries {
+        let is_operator = state.address(&query.owner).map_or(false, |a| {
+            a.holder().map_or(false, |h| {
+                h.active().map_or(false, |a| a.has_operator(&query.address))
+            })
+        });
+        res.push(is_operator);
+    }
+
     Ok(OperatorOfQueryResponse(res))
 }

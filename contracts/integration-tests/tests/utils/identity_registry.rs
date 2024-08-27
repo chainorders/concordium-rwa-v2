@@ -1,4 +1,4 @@
-use std::error::Error;
+#![allow(unused)]
 
 use concordium_rwa_identity_registry::identities::RegisterIdentityParams;
 use concordium_rwa_identity_registry::types::{Identity, IdentityAttribute};
@@ -13,7 +13,6 @@ use concordium_std::{
 
 use super::MAX_ENERGY;
 
-pub type ContractResult<T> = Result<T, dyn Error>;
 const MODULE_PATH: &str = "../identity-registry/contract.wasm.v1";
 const CONTRACT_NAME: ContractName = ContractName::new_unchecked("init_rwa_identity_registry");
 
@@ -74,7 +73,7 @@ pub fn register_nationalities(
     chain: &mut Chain,
     sender: &Account,
     contract: &ContractAddress,
-    nationalities: Vec<(Address, String)>,
+    nationalities: Vec<(Address, &str)>,
 ) -> Vec<ContractInvokeSuccess> {
     nationalities
         .iter()
@@ -84,7 +83,7 @@ pub fn register_nationalities(
                 identity: Identity {
                     attributes:  vec![IdentityAttribute {
                         tag:   NATIONALITY_ATTRIBUTE_TAG,
-                        value: nationality.to_owned(),
+                        value: nationality.to_string(),
                     }],
                     credentials: vec![],
                 },

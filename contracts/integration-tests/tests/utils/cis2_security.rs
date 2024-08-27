@@ -1,7 +1,11 @@
+#![allow(unused)]
+
 use concordium_cis2::{
     BalanceOfQueryParams, BalanceOfQueryResponse, IsTokenAmount, IsTokenId, TransferParams,
 };
-use concordium_protocols::concordium_cis2_security::{AgentWithRoles, BurnParams, FreezeParams};
+use concordium_protocols::concordium_cis2_security::{
+    AgentWithRoles, BurnParams, FreezeParams, PauseParams,
+};
 use concordium_smart_contract_testing::*;
 use concordium_std::{Deserial, Serial};
 
@@ -149,7 +153,7 @@ where {
         .expect("Set Identity Registry")
 }
 
-pub fn set_compliance_registry(
+pub fn set_compliance(
     chain: &mut Chain,
     sender: &Account,
     contract: ContractAddress,
@@ -239,23 +243,35 @@ where
     T: IsTokenId,
     A: IsTokenAmount,
 {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("burn"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("burn")
+    burn_raw(chain, sender, contract, contract_name, payload).expect("burn")
+}
+
+pub fn burn_raw<T, A>(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    contract_name: ContractName,
+    payload: &BurnParams<T, A>,
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
+where
+    T: IsTokenId,
+    A: IsTokenAmount,
+{
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("burn"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn forced_burn<T, A>(
@@ -264,28 +280,26 @@ pub fn forced_burn<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &BurnParams<T, A>,
-) -> ContractInvokeSuccess
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
 {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("forcedBurn"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("forced_burn")
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("forcedBurn"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn freeze<T, A>(
@@ -294,28 +308,26 @@ pub fn freeze<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &FreezeParams<T, A>,
-) -> ContractInvokeSuccess
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
 {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("freeze"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("freeze")
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("freeze"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn un_freeze<T, A>(
@@ -324,28 +336,26 @@ pub fn un_freeze<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &FreezeParams<T, A>,
-) -> ContractInvokeSuccess
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
 {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("unFreeze"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("un_freeze")
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("unFreeze"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn balance_of_frozen<T, A>(
@@ -354,7 +364,7 @@ pub fn balance_of_frozen<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &BalanceOfQueryParams<T>,
-) -> BalanceOfQueryResponse<A>
+) -> Result<BalanceOfQueryResponse<A>, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
@@ -374,9 +384,7 @@ where
                 message:      OwnedParameter::from_serial(payload).unwrap(),
             },
         )
-        .expect("Balance of frozen")
-        .parse_return_value()
-        .unwrap()
+        .map(|r| r.parse_return_value().unwrap())
 }
 
 pub fn balance_of_un_frozen<T, A>(
@@ -385,7 +393,7 @@ pub fn balance_of_un_frozen<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &BalanceOfQueryParams<T>,
-) -> BalanceOfQueryResponse<A>
+) -> Result<BalanceOfQueryResponse<A>, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
@@ -405,9 +413,7 @@ where
                 message:      OwnedParameter::from_serial(payload).unwrap(),
             },
         )
-        .expect("Balance of un frozen")
-        .parse_return_value()
-        .unwrap()
+        .map(|r| r.parse_return_value().unwrap())
 }
 
 pub fn forced_transfer<T: IsTokenId, A: IsTokenAmount>(
@@ -416,22 +422,44 @@ pub fn forced_transfer<T: IsTokenId, A: IsTokenAmount>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &TransferParams<T, A>,
-) -> ContractInvokeSuccess {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("forcedTransfer"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("forced_transfer")
+) -> Result<ContractInvokeSuccess, ContractInvokeError> {
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("forcedTransfer"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
+}
+
+pub fn pause<T: IsTokenId>(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    contract_name: ContractName,
+    payload: &PauseParams<T>,
+) -> Result<ContractInvokeSuccess, ContractInvokeError> {
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("pause"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }

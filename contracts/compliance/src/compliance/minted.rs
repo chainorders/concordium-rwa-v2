@@ -19,18 +19,17 @@ use super::types::*;
     contract = "rwa_compliance",
     name = "minted",
     parameter = "MintedParam<TokenId, TokenAmount>",
-    error = "super::error::Error"
+    error = "super::error::Error",
+    mutable
 )]
-fn minted(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<()> {
+fn minted(ctx: &ReceiveContext, host: &mut Host<State>) -> ContractResult<()> {
     let params: MintedParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
-    let state = host.state();
-
-    for module in state.modules.iter() {
+    for module in host.state.modules().iter() {
         ensure!(
             ctx.sender().matches_contract(&params.token_id.contract),
             Error::Unauthorized
         );
-        compliance_client::minted(host, module.to_owned(), &params)?;
+        compliance_client::minted(host, module, &params)?;
     }
 
     Ok(())

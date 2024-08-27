@@ -1,5 +1,17 @@
 use concordium_cis2::{IsTokenAmount, IsTokenId, Receiver};
-use concordium_std::{Address, ContractAddress, SchemaType, Serialize};
+use concordium_std::{AccountAddress, Address, ContractAddress, SchemaType, Serialize};
+
+#[derive(Serialize, SchemaType)]
+pub struct MintParam<A: IsTokenAmount> {
+    pub address: AccountAddress,
+    pub amount:  A,
+}
+
+#[derive(Serialize, SchemaType)]
+pub struct MintParams<T: IsTokenId, A: IsTokenAmount> {
+    pub token_id: T,
+    pub owners:   Vec<MintParam<A>>,
+}
 
 #[derive(Serialize, SchemaType)]
 pub struct PauseParams<T: IsTokenId> {

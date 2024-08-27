@@ -21,7 +21,7 @@ fn can_transfer(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool
     let state = host.state();
 
     for module in state.modules.iter() {
-        let can_transfer = compliance_client::can_transfer(host, module.to_owned(), &params)?;
+        let can_transfer = compliance_client::can_transfer(host, &module, &params)?;
 
         if !can_transfer {
             return Ok(false);

@@ -20,18 +20,19 @@ use super::types::*;
     contract = "rwa_compliance",
     name = "transferred",
     parameter = "TransferredParam<TokenId, TokenAmount>",
-    error = "super::error::Error"
+    error = "super::error::Error",
+    mutable
 )]
-fn transferred(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<()> {
+fn transferred(ctx: &ReceiveContext, host: &mut Host<State>) -> ContractResult<()> {
     let params: TransferredParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
-    let state = host.state();
+    let modules = host.state().modules();
 
-    for module in state.modules.iter() {
+    for module in modules {
         ensure!(
             ctx.sender().matches_contract(&params.token_id.contract),
             Error::Unauthorized
         );
-        compliance_client::transferred(host, module.to_owned(), &params)?;
+        compliance_client::transferred(host, &module, &params)?;
     }
 
     Ok(())

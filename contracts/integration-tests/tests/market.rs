@@ -1,26 +1,28 @@
+#![cfg(test)]
 #![allow(clippy::diverging_sub_expression, clippy::too_many_arguments)]
 
-pub mod utils;
+mod utils;
 
 use concordium_cis2::{
     AdditionalData, Receiver, TokenAmountU64, TokenAmountU8, TokenIdU32, TokenIdUnit, TokenIdVec,
 };
-use concordium_protocols::concordium_cis2_security::AgentWithRoles;
+use concordium_protocols::concordium_cis2_security::{AgentWithRoles, MintParam};
 use concordium_rwa_market::event::{PaymentAmount, PaymentTokenUId};
 use concordium_rwa_market::exchange::ExchangeParams;
 use concordium_rwa_market::list::ListParams;
 use concordium_rwa_market::types::{ExchangeRate, Rate, TokenUId};
 use concordium_smart_contract_testing::*;
 use concordium_std::ops::Sub;
-use security_sft_rewards::types::{AgentRole, ContractMetadataUrl, InitParam, MintParam};
+use security_sft_rewards::types::{AgentRole, ContractMetadataUrl, InitParam, MintParams};
 use utils::cis2_conversions::*;
 use utils::*;
+
+const COMPLIANT_NATIONALITIES: [&str; 2] = ["IN", "US"];
 pub const DEFAULT_ACC_BALANCE: Amount = Amount {
     micro_ccd: 1_000_000_000_u64,
 };
 #[test]
 fn market_buy_via_transfer_of_cis2() {
-    let compliant_nationalities = ["IN".to_owned(), "US".to_owned()];
     let admin = Account::new(AccountAddress([0; 32]), DEFAULT_ACC_BALANCE);
     let ir_agent = Account::new(AccountAddress([1; 32]), DEFAULT_ACC_BALANCE);
     let token_contract_agent = Account::new(AccountAddress([4; 32]), DEFAULT_ACC_BALANCE);
@@ -46,14 +48,14 @@ fn market_buy_via_transfer_of_cis2() {
 
     identity_registry::deploy_module(&mut chain, &admin);
     compliance::deploy_module(&mut chain, &admin);
-    sft_security::deploy_module(&mut chain, &admin);
+    security_sft_rewards_client::deploy_module(&mut chain, &admin);
     market::deploy_module(&mut chain, &admin);
     let ir_contract = identity_registry::init(&mut chain, &admin).contract_address;
     let compliance_contract = compliance::init_all(
         &mut chain,
         &admin,
         ir_contract,
-        compliant_nationalities.to_vec(),
+        COMPLIANT_NATIONALITIES.to_vec(),
     )
     .contract_address;
     identity_registry::add_agent(
@@ -63,14 +65,14 @@ fn market_buy_via_transfer_of_cis2() {
         &Address::Account(ir_agent.address),
     );
 
-    let token_contract = sft_security::init(&mut chain, &admin, &InitParam {
+    let token_contract = security_sft_rewards_client::init(&mut chain, &admin, &InitParam {
         compliance:                compliance_contract,
         identity_registry:         ir_contract,
         metadata_url:              ContractMetadataUrl {
             hash: None,
             url:  "example.com".to_string(),
         },
-        sponsors:                  vec![],
+        sponsors:                  None,
         blank_reward_metadata_url: ContractMetadataUrl {
             hash: None,
             url:  "reward.example.com".to_string(),
@@ -79,7 +81,7 @@ fn market_buy_via_transfer_of_cis2() {
         min_reward_token_id:       TokenIdU32(1),
     })
     .contract_address;
-    sft_security::add_agent(&mut chain, &admin, token_contract, &AgentWithRoles {
+    security_sft_rewards_client::add_agent(&mut chain, &admin, token_contract, &AgentWithRoles {
         address: Address::Account(token_contract_agent.address),
         roles:   vec![AgentRole::Mint],
     });
@@ -102,26 +104,22 @@ fn market_buy_via_transfer_of_cis2() {
     .contract_address;
     identity_registry::register_nationalities(&mut chain, &ir_agent, &ir_contract, vec![(
         Address::Contract(market),
-        "IN".to_owned(),
+        COMPLIANT_NATIONALITIES[0],
     )]);
     identity_registry::register_nationalities(&mut chain, &ir_agent, &ir_contract, vec![
-        (
-            Address::Account(buyer.address),
-            compliant_nationalities[0].clone(),
-        ),
-        (
-            Address::Account(seller.address),
-            compliant_nationalities[1].clone(),
-        ),
+        (Address::Account(buyer.address), COMPLIANT_NATIONALITIES[0]),
+        (Address::Account(seller.address), COMPLIANT_NATIONALITIES[1]),
     ]);
     let buy_token = TokenIdU32(0);
-    sft_security::mint(
+    security_sft_rewards_client::mint(
         &mut chain,
         &token_contract_agent,
         &token_contract,
-        &MintParam {
-            amount:   TokenAmountU64(1),
-            owner:    Receiver::Account(seller.address),
+        &MintParams {
+            owners:   vec![MintParam {
+                amount:  TokenAmountU64(1),
+                address: seller.address,
+            }],
             token_id: buy_token,
         },
     );
@@ -141,7 +139,7 @@ fn market_buy_via_transfer_of_cis2() {
         id:       to_token_id_vec(buy_token),
     };
 
-    sft_security::transfer_single(
+    security_sft_rewards_client::transfer_single(
         &mut chain,
         &seller,
         token_contract,
@@ -161,7 +159,8 @@ fn market_buy_via_transfer_of_cis2() {
             })
             .into(),
         },
-    );
+    )
+    .expect("Transfer");
 
     assert_eq!(
         market::balance_of_listed(
@@ -282,24 +281,26 @@ fn market_buy_via_transfer_of_cis2() {
 
     // Settlement of the Buy Token
     assert_eq!(
-        sft_security::balance_of_single(
+        security_sft_rewards_client::balance_of_single(
             &mut chain,
             &admin,
             token_contract,
             TokenIdU32(0),
             Address::Account(seller.address),
-        ),
+        )
+        .unwrap(),
         TokenAmountU64(0),
         "Seller balance"
     );
     assert_eq!(
-        sft_security::balance_of_single(
+        security_sft_rewards_client::balance_of_single(
             &mut chain,
             &admin,
             token_contract,
             TokenIdU32(0),
             Address::Account(buyer.address),
-        ),
+        )
+        .unwrap(),
         TokenAmountU64(1),
         "Buyer balance"
     );
