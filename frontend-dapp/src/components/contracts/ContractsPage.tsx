@@ -9,6 +9,8 @@ import {
 	Toolbar,
 	Typography,
 } from "@mui/material";
+import { Box, useTheme } from '@mui/material';
+
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { Contract } from "./ContractTypes";
 import { useEffect, useReducer, useState } from "react";
@@ -17,6 +19,7 @@ import ContractsList from "./ContractsList";
 import ConcordiumContract from "./ConcordiumContract";
 import ContractLayout from "./ContractLayout";
 import ErrorDisplay from "../common/ErrorDisplay";
+import { uiCustomizations } from "../../config/theme";
 import {
 	EventType,
 	WalletApi,
@@ -28,15 +31,16 @@ import {
 	EntrypointName,
 } from "@concordium/web-sdk";
 import {
-	AccountCircle,
 	HomeRounded,
 	Login,
 	Logout,
 	Error,
+	ArrowDownward,
 } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import InfoDisplay from "../common/InfoDisplay";
 import { RegistryWidgetsType, UiSchema } from "@rjsf/utils";
+import logo from '../../assets/logo.svg'; // Correctly import the logo using Vite
 
 const ContractsAppBar = (props: {
 	onLogin: (account: AccountAddress.Type, wallet: WalletApi) => void;
@@ -101,15 +105,17 @@ const ContractsAppBar = (props: {
 	};
 
 	return (
-		<AppBar position="static" sx={{ bgcolor: grey[800] }}>
+		<AppBar position="static">
 			<Toolbar>
 				<IconButton onClick={() => navigate("")}>
-					<Icon sx={{ fontSize: 30 }}>
-						<HomeRounded sx={{ fontSize: 30, color: grey[50] }} />
-					</Icon>
+					<img
+						src={logo}
+						alt="Logo"
+						style={{ height: 30 }}
+					/>
 				</IconButton>
 				<Typography fontSize={30} component="div" sx={{ flexGrow: 1 }}>
-					Global Admin
+					{uiCustomizations.headerTitle}
 				</Typography>
 				{error && (
 					<IconButton
@@ -137,28 +143,21 @@ const ContractsAppBar = (props: {
 				{isLoggedIn && (
 					<>
 						<IconButton
-							size="large"
+							size="small"
 							aria-label="account of current user"
 							aria-controls="menu-appbar"
 							aria-haspopup="true"
 							onClick={handleMenu}
 							color="inherit"
+							style={{ fontSize: 12 }}
 							title={account!.address}
 						>
-							<AccountCircle />
+							{`${account!.address.slice(0, 7)}...`} <ArrowDownward style={{ marginLeft: 4, width: 12 }} />
 						</IconButton>
 						<Menu
 							id="menu-appbar"
 							anchorEl={anchorEl}
-							anchorOrigin={{
-								vertical: "top",
-								horizontal: "right",
-							}}
 							keepMounted
-							transformOrigin={{
-								vertical: "top",
-								horizontal: "right",
-							}}
 							open={Boolean(anchorEl)}
 							onClose={handleClose}
 						>
@@ -252,6 +251,28 @@ const ContractType = (props: {
 	);
 };
 
+function Footer() {
+	return (
+		<Box
+			sx={{
+				width: "100%", // full width
+				height: "60px", // fixed height
+				backgroundColor: "grey.900", // dark background color
+				color: "white", // white text color
+				display: "flex", // use flexbox for centering content
+				alignItems: "center", // center content vertically
+				justifyContent: "center", // center content horizontally
+				boxSizing: "border-box", // include padding in width/height
+				mt: "auto", // push footer to the bottom
+			}}
+		>
+			{/* Footer content goes here */}
+		</Box>
+	);
+}
+
+
+
 const ConnectedContent = () => {
 	const contractFiles = import.meta.glob([`../../lib/generated/*.ts`]);
 	const [contractsState, setContractsState] = useState<
@@ -317,7 +338,7 @@ const ConnectedContent = () => {
 	};
 
 	return (
-		<Paper variant="outlined" sx={{ p: 2, m: 1 }}>
+		<Paper variant="outlined" >
 			<Routes>
 				<Route
 					path=""
@@ -336,7 +357,7 @@ const ConnectedContent = () => {
 						key={contractType}
 						element={
 							contractsState[contractType]?.clientModule &&
-							contractsState[contractType]?.uiModule ? (
+								contractsState[contractType]?.uiModule ? (
 								<ContractType
 									key={contractType}
 									contractType={contractType}
@@ -386,14 +407,40 @@ export default function ContractsPage() {
 			text: "Please connect to Concordium Wallet",
 		});
 	};
+	const theme = useTheme();
 
 	return (
-		<>
+		<Box sx={{
+
+			flexGrow: 1, // allows this section to grow and fill space
+			backgroundColor: theme.palette.background.default, // applies background color from theme
+			display: 'flex',
+			flexDirection: 'column',
+			minHeight: "100%"
+		}}>
 			<ContractsAppBar
 				onLogin={(account, wallet) => setWallet({ account, wallet })}
 				onLogout={onLogout}
 			/>
-			{isLoggedIn ? <ConnectedContent /> : <DisconnectedContent />}
-		</>
+			<Box
+				sx={{
+					display: 'flex',
+					flexDirection: 'column',
+				}}
+			>
+				<Box
+					sx={{
+						padding: 2, // equivalent to padding: 20px
+						flexGrow: 1, // allows this section to grow and fill space
+						backgroundColor: theme.palette.background.default, // applies background color from theme
+						display: 'flex',
+						flexDirection: 'column',
+					}}
+				>
+					{isLoggedIn ? <ConnectedContent /> : <DisconnectedContent />}
+				</Box>
+			</Box>
+			<Footer />
+		</Box>
 	);
 }

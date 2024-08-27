@@ -192,20 +192,14 @@ export default function SendTransactionButton(
 	const SentLarge = () => {
 		return (
 			<ButtonGroup fullWidth>
-				<Button variant="contained" disabled>
-					<Typography pr={1}>Transaction {state.status!}</Typography>
+				<Button variant="contained" disabled endIcon={
+					state.error ? <ErrorIcon /> : <CircularProgress size={10} />
+
+				}>
+					Transaction {state.status!}
 				</Button>
 				<CCDScanTransactionLink transactionHash={state.txnHash!} />
-				{state.error && (
-					<IconButton color="error" size="small" title={state.error} disabled>
-						<ErrorIcon />
-					</IconButton>
-				)}
-				{!state.error && (
-					<IconButton disabled>
-						<CircularProgress size={10} />
-					</IconButton>
-				)}
+
 			</ButtonGroup>
 		);
 	};
@@ -225,21 +219,15 @@ export default function SendTransactionButton(
 	const FinalizedLarge = () => {
 		return (
 			<ButtonGroup fullWidth color={state.error ? "error" : "success"}>
-				<Button variant="contained" color="success" onClick={onDone}>
-					<Typography pr={1}>Transaction {state.status!}</Typography>
+				<Button variant="contained" color="success" onClick={onDone} endIcon={
+					state.error ?
+						<ErrorIcon /> :
+						<CheckCircle />
+				}>
+					Transaction {state.status!}
 				</Button>
 				<CCDScanTransactionLink transactionHash={state.txnHash!} />
-				{state.error && (
-					<IconButton color="error" size="small" title={state.error}>
-						<ErrorIcon />
-					</IconButton>
-				)}
-				{!state.error && (
-					<IconButton color="success" title="Transaction successful" disabled>
-						<CheckCircle />
-					</IconButton>
-				)}
-			</ButtonGroup>
+			</ButtonGroup >
 		);
 	};
 

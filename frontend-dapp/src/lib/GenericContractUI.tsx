@@ -81,30 +81,30 @@ const parseFinalizedUpdate: (
 ) => ParsedFinalizedUpdateSuccess | ParsedFinalizedContractUpdateTxnError = (
 	txnSummary,
 ) => {
-	switch (txnSummary.summary.type) {
-		case TransactionSummaryType.AccountTransaction: {
-			switch (txnSummary.summary.transactionType) {
-				case TransactionKindString.Update: {
-					return { tag: "success", value: txnSummary.summary };
-				}
-				case TransactionKindString.Failed: {
-					switch (txnSummary.summary.rejectReason.tag) {
-						case RejectReasonTag.RejectedReceive: {
-							return { tag: "error", value: txnSummary.summary.rejectReason };
-						}
-						default:
-							throw new Error("Unknown reject reason");
+		switch (txnSummary.summary.type) {
+			case TransactionSummaryType.AccountTransaction: {
+				switch (txnSummary.summary.transactionType) {
+					case TransactionKindString.Update: {
+						return { tag: "success", value: txnSummary.summary };
 					}
+					case TransactionKindString.Failed: {
+						switch (txnSummary.summary.rejectReason.tag) {
+							case RejectReasonTag.RejectedReceive: {
+								return { tag: "error", value: txnSummary.summary.rejectReason };
+							}
+							default:
+								throw new Error("Unknown reject reason");
+						}
+					}
+					default:
+						throw new Error("Unknown account transaction type");
 				}
-				default:
-					throw new Error("Unknown account transaction type");
+				break;
 			}
-			break;
+			default:
+				throw new Error("Unknown transaction type");
 		}
-		default:
-			throw new Error("Unknown transaction type");
-	}
-};
+	};
 
 export interface GenericUpdateRequestProps<TReq, TError> {
 	contract: ContractAddress.Type;
@@ -235,13 +235,11 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="success"
+												endIcon={<CheckCircle />
+												}
+
 											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+												Transaction {state.status!}
 											</Button>
 										</>
 									),
@@ -249,24 +247,23 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 										<>
 											{(state as UpdateFinalizedErrorState<TErrorUi>).response
 												?.message && (
-												<Typography color="error">
-													{
-														(state as UpdateFinalizedErrorState<TErrorUi>)
-															.response?.message
-													}
-												</Typography>
-											)}
+													<Typography color="error">
+														{
+															(state as UpdateFinalizedErrorState<TErrorUi>)
+																.response?.message
+														}
+													</Typography>
+												)}
 											<Button
 												variant="contained"
 												onClick={resetState}
 												color="error"
-											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
+												endIcon={
 													<CheckCircle />
-												</Icon>
+												}
+											>
+												Transaction{state.status!}
+
 											</Button>
 										</>
 									),
@@ -277,7 +274,7 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 				}[state.type]
 			}
 			{state.error && <Typography color="error">{state.error}</Typography>}
-		</Stack>
+		</Stack >
 	);
 }
 
@@ -381,8 +378,8 @@ export function GenericInvoke<TReq, TReqUi, TRes, TResUi, TError, TErrorUi>(
 						// console.log("response schema", props.responseSchemaBase64);
 						const uiResult: TResUi | undefined =
 							contractResult != null &&
-							contractResult != undefined &&
-							props.responseSchemaBase64
+								contractResult != undefined &&
+								props.responseSchemaBase64
 								? parseContractToUi(contractResult, props.responseSchemaBase64)
 								: undefined;
 						// console.log("ui result", props.method.entrypoint.value, uiResult);
@@ -484,35 +481,36 @@ export function GenericInvoke<TReq, TReqUi, TRes, TResUi, TError, TErrorUi>(
 											<Alert severity="error">Invoke Request Error</Alert>
 											{(state as InvokeResponseErrorState<TErrorUi>).value
 												?.value && (
-												<Form
-													schema={props.errorJsonSchema || {}}
-													validator={validator}
-													formData={
-														(state as InvokeResponseErrorState<TErrorUi>).value
-															?.value
-													}
-													readonly
-													onSubmit={resetState}
-												/>
-											)}
+													<Form
+														schema={props.errorJsonSchema || {}}
+														validator={validator}
+														formData={
+															(state as InvokeResponseErrorState<TErrorUi>).value
+																?.value
+														}
+														readonly
+														onSubmit={resetState}
+													/>
+												)}
 											{(state as InvokeResponseErrorState<TErrorUi>).value
 												?.message && (
-												<Typography color="error">
-													{
-														(state as InvokeResponseErrorState<TErrorUi>).value
-															?.message
-													}
-												</Typography>
-											)}
+													<Typography color="error">
+														{
+															(state as InvokeResponseErrorState<TErrorUi>).value
+																?.message
+														}
+													</Typography>
+												)}
 											<Button
 												variant="contained"
 												onClick={resetState}
 												color="error"
-											>
-												<Typography pr={1}>Ok</Typography>
-												<Icon sx={{ ml: "1em" }}>
+												endIcon={
 													<CheckCircle />
-												</Icon>
+												}
+											>
+												Ok
+
 											</Button>
 										</>
 									),
@@ -553,37 +551,37 @@ const parseFinalizedInit: (
 ) => ParsedFinalizedInitSuccess | ParsedFinalizedContractInitTxnError = (
 	txnSummary,
 ) => {
-	switch (txnSummary.summary.type) {
-		case TransactionSummaryType.AccountTransaction: {
-			switch (txnSummary.summary.transactionType) {
-				case TransactionKindString.InitContract: {
-					return {
-						tag: "success",
-						value: txnSummary.summary.contractInitialized.address,
-					};
-				}
-				case TransactionKindString.Failed: {
-					switch (txnSummary.summary.rejectReason.tag) {
-						case RejectReasonTag.RejectedInit: {
-							return { tag: "error", value: txnSummary.summary.rejectReason };
-						}
-						default:
-							throw new Error(
-								`Unknown reject reason ${txnSummary.summary.rejectReason.tag}`,
-							);
+		switch (txnSummary.summary.type) {
+			case TransactionSummaryType.AccountTransaction: {
+				switch (txnSummary.summary.transactionType) {
+					case TransactionKindString.InitContract: {
+						return {
+							tag: "success",
+							value: txnSummary.summary.contractInitialized.address,
+						};
 					}
+					case TransactionKindString.Failed: {
+						switch (txnSummary.summary.rejectReason.tag) {
+							case RejectReasonTag.RejectedInit: {
+								return { tag: "error", value: txnSummary.summary.rejectReason };
+							}
+							default:
+								throw new Error(
+									`Unknown reject reason ${txnSummary.summary.rejectReason.tag}`,
+								);
+						}
+					}
+					default:
+						throw new Error(
+							`"Unknown account transaction type: ${txnSummary.summary.transactionType}`,
+						);
 				}
-				default:
-					throw new Error(
-						`"Unknown account transaction type: ${txnSummary.summary.transactionType}`,
-					);
+				break;
 			}
-			break;
+			default:
+				throw new Error(`Unknown transaction type: ${txnSummary.summary.type}`);
 		}
-		default:
-			throw new Error(`Unknown transaction type: ${txnSummary.summary.type}`);
-	}
-};
+	};
 
 export interface GenericInitRequestProps<TReq> {
 	onContractInitialized: (contract: ContractAddress.Type) => void;
@@ -718,13 +716,10 @@ export function GenericInit<TReq, TReqUi>(
 								{
 									success: (
 										<>
-											<Button variant="contained" onClick={resetState}>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+											<Button variant="contained" onClick={resetState} endIcon={<CheckCircle />
+											}>
+												Transaction {state.status!}
+
 											</Button>
 										</>
 									),
