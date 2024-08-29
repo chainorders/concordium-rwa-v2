@@ -8,52 +8,34 @@ import { Box } from "@mui/material";
 import ContractsPage from "./components/contracts/ContractsPage";
 import ConcordiumWalletProvider from "./components/WalletProvider";
 import ConcordiumNodeClientProvider from "./components/NodeClientProvider";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { themeOptions } from "./config/theme";
+import "./App.css";
 
-function Footer() {
-	return (
-		<Box
-			sx={{
-				width: "100%", // full width
-				height: "60px", // fixed height
-				backgroundColor: "grey.900", // dark background color
-				color: "white", // white text color
-				position: "fixed", // fixed position
-				bottom: 0, // stick to bottom
-				display: "flex", // use flexbox for centering content
-				alignItems: "center", // center content vertically
-				justifyContent: "center", // center content horizontally
-				padding: "0 16px", // horizontal padding
-				zIndex: (theme) => theme.zIndex.drawer + 1,
-			}}
-		>
-			{/* Footer content goes here */}
-		</Box>
-	);
-}
-
-// Main layout component
 function Layout() {
+	const theme = createTheme(themeOptions);
+
 	return (
 		<ConcordiumNodeClientProvider>
 			<ConcordiumWalletProvider>
-				<Router>
-					<Box
-						sx={{
-							display: "flex",
-							flexDirection: "column",
-							minHeight: "100vh",
-							width: "100%",
-						}}
-					>
-						<Box pb="70px">
+				<ThemeProvider theme={theme}>
+					<Router>
+						<Box
+							sx={{
+								display: "flex",
+								flexDirection: "column",
+								height: "100%",
+								width: "100%",
+								boxSizing: "border-box",
+							}}
+						>
 							<Routes>
 								<Route path="contracts/*" Component={ContractsPage} />
 								<Route path="*" element={<Navigate to="contracts" replace />} />
 							</Routes>
 						</Box>
-						<Footer />
-					</Box>
-				</Router>
+					</Router>
+				</ThemeProvider>
 			</ConcordiumWalletProvider>
 		</ConcordiumNodeClientProvider>
 	);

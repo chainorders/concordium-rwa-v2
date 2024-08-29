@@ -17,12 +17,27 @@ import {
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { ReactNode } from "react";
+import { useTheme } from "@mui/material/styles";
 
 function ContractLink(props: { contract: Contract }) {
+	const theme = useTheme();
+
 	const contractAddressString = `${props.contract.address.index.toString()}/${props.contract.address.subindex.toString()}`;
 	return (
-		<Link to={`${props.contract.type}/${contractAddressString}`} target="_self">
-			{props.contract.name} ({contractAddressString})
+		<Link
+			id="id"
+			to={`${props.contract.type}/${contractAddressString}`}
+			target="_self"
+			style={{ textDecoration: "none", width: "80%" }}
+		>
+			<span
+				style={{
+					color: theme.palette.text.primary,
+					width: "80%",
+				}}
+			>
+				{props.contract.name} ({contractAddressString})
+			</span>
 		</Link>
 	);
 }
@@ -54,37 +69,45 @@ const ContractGroup = (props: {
 			<ListSubheader>{props.contractType}</ListSubheader>
 			{props.contracts.map((contract) => {
 				return (
-					<ListItem
-						key={contract.address.index.toString()}
-						secondaryAction={
-							<>
-								<Link
-									to={`${contract.type}/${contract.address.index.toString()}/${contract.address.subindex.toString()}`}
-									target="_blank"
+					<div style={{ display: "flex", flexDirection: "row" }}>
+						<ListItem key={contract.address.index.toString()}>
+							<ListItemButton>
+								<ListItemIcon>
+									<CodeRounded />
+								</ListItemIcon>
+								<ListItemText primary={<ContractLink contract={contract} />} />
+							</ListItemButton>
+						</ListItem>
+						<div
+							style={{
+								display: "flex",
+								flexDirection: "row",
+								justifyContent: "center",
+								alignItems: "center",
+								marginRight: 15,
+								gap: 5,
+							}}
+						>
+							<Link
+								to={`${contract.type}/${contract.address.index.toString()}/${contract.address.subindex.toString()}`}
+								target="_blank"
+							>
+								<IconButton edge="end" aria-label="open contract">
+									<OpenInBrowser />
+								</IconButton>
+							</Link>
+
+							{props.onDelete && (
+								<IconButton
+									edge="end"
+									aria-label="delete"
+									onClick={() => props.onDelete!(contract)}
 								>
-									<IconButton edge="end" aria-label="open contract">
-										<OpenInBrowser />
-									</IconButton>
-								</Link>
-								{props.onDelete && (
-									<IconButton
-										edge="end"
-										aria-label="delete"
-										onClick={() => props.onDelete!(contract)}
-									>
-										<Delete />
-									</IconButton>
-								)}
-							</>
-						}
-					>
-						<ListItemButton>
-							<ListItemIcon>
-								<CodeRounded />
-							</ListItemIcon>
-							<ListItemText primary={<ContractLink contract={contract} />} />
-						</ListItemButton>
-					</ListItem>
+									<Delete />
+								</IconButton>
+							)}
+						</div>
+					</div>
 				);
 			})}
 			{props.onInit && (

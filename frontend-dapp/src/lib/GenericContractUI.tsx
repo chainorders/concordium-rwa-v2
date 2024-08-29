@@ -18,7 +18,6 @@ import {
 	Typography,
 	CircularProgress,
 	Button,
-	Icon,
 	Alert,
 } from "@mui/material";
 import { useState } from "react";
@@ -235,13 +234,9 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="success"
+												endIcon={<CheckCircle />}
 											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+												Transaction {state.status!}
 											</Button>
 										</>
 									),
@@ -260,13 +255,9 @@ export function GenericUpdate<TReq, TReqUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="error"
+												endIcon={<CheckCircle />}
 											>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+												Transaction{state.status!}
 											</Button>
 										</>
 									),
@@ -508,11 +499,9 @@ export function GenericInvoke<TReq, TReqUi, TRes, TResUi, TError, TErrorUi>(
 												variant="contained"
 												onClick={resetState}
 												color="error"
+												endIcon={<CheckCircle />}
 											>
-												<Typography pr={1}>Ok</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+												Ok
 											</Button>
 										</>
 									),
@@ -718,13 +707,12 @@ export function GenericInit<TReq, TReqUi>(
 								{
 									success: (
 										<>
-											<Button variant="contained" onClick={resetState}>
-												<Typography pr={1}>
-													Transaction {state.status!}
-												</Typography>
-												<Icon sx={{ ml: "1em" }}>
-													<CheckCircle />
-												</Icon>
+											<Button
+												variant="contained"
+												onClick={resetState}
+												endIcon={<CheckCircle />}
+											>
+												Transaction {state.status!}
 											</Button>
 										</>
 									),

@@ -1,4 +1,4 @@
-import { Stack, Grid, Paper } from "@mui/material";
+import { Stack, Grid, Paper, Typography } from "@mui/material";
 import { Route, Routes, useLocation, useParams } from "react-router-dom";
 import { ContractAddress, EntrypointName } from "@concordium/web-sdk";
 import EntrypointsList from "./EntrypointsList";
@@ -41,8 +41,18 @@ export default function ConcordiumContract(props: {
 									element={entrypointUi[entrypoint]({ contract })}
 								/>
 							))}
-							<Route path="" element={<h2>Select an Entrypoint</h2>} />
-							<Route path="*" element={<h2>Unknown Entrypoint</h2>} />
+							<Route
+								path=""
+								element={
+									<Typography variant="h3">Select an Entrypoint</Typography>
+								}
+							/>
+							<Route
+								path="*"
+								element={
+									<Typography variant="h3">Unknown Entrypoint</Typography>
+								}
+							/>
 						</Routes>
 					</Paper>
 				</Grid>

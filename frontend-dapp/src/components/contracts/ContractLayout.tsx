@@ -1,4 +1,4 @@
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography, Box } from "@mui/material";
 import { Contract } from "./ContractTypes";
 import { Outlet, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -48,63 +48,70 @@ export default function ContractLayout(props: { contracts: Contract[] }) {
 	return (
 		<Stack spacing={2}>
 			<Grid container spacing={1}>
-				<Grid item xs={12} md={9}>
+				<Grid item xs={12} md={8}>
 					<Outlet context={contract} />
 				</Grid>
-				<Grid item xs={0} md={3}>
-					<Grid container spacing={2}>
-						<Grid item xs={12} md={12}>
-							<Paper>
-								<Typography variant="h4" fontSize={18}>
-									On Chain Information
-								</Typography>
-								{onChainInfo && (
-									<>
-										<Typography>
-											Module Ref :
-											{
-												<CCDScanModuleLink
-													moduleRef={onChainInfo?.sourceModule.moduleRef}
-												/>
-											}
+				<Grid item xs={0} md={4}>
+					<Box sx={{ py: 3, width: "90%" }}>
+						<Paper
+							sx={{
+								p: 2,
+								mb: 2,
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								wordWrap: "break-word",
+							}}
+						>
+							<Typography variant="h4" fontSize={18} gutterBottom>
+								On Chain Information
+							</Typography>
+							{onChainInfo && (
+								<>
+									<Typography variant="body1" gutterBottom>
+										Module Ref:
+										<CCDScanModuleLink
+											moduleRef={onChainInfo?.sourceModule.moduleRef}
+										/>
+									</Typography>
+									<Typography variant="body1" gutterBottom>
+										Name:
+										<CCDScanContractLink
+											text={onChainInfo?.name.value}
+											index={contract.address.index.toString()}
+											subIndex={contract.address.subindex.toString()}
+										/>
+									</Typography>
+									<Typography variant="body1">
+										Owner:
+										<CCDScanAccountLink account={onChainInfo?.owner.address} />
+									</Typography>
+								</>
+							)}
+						</Paper>
+
+						<Paper
+							sx={{
+								p: 2,
+								mb: 2,
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								wordWrap: "break-word",
+							}}
+						>
+							<Typography variant="h4" fontSize={18} gutterBottom>
+								Module Actions
+							</Typography>
+							{onChainInfo && (
+								<>
+									{onChainInfo.methods.map((method) => (
+										<Typography key={method.value} variant="body2" gutterBottom>
+											{method.value}
 										</Typography>
-										<Typography>
-											Name :{" "}
-											<CCDScanContractLink
-												text={onChainInfo?.name.value}
-												index={contract.address.index.toString()}
-												subIndex={contract.address.subindex.toString()}
-											/>
-										</Typography>
-										<Typography>
-											Owner:{" "}
-											<CCDScanAccountLink
-												account={onChainInfo?.owner.address}
-											/>
-										</Typography>
-									</>
-								)}
-							</Paper>
-						</Grid>
-						<Grid item xs={12} md={12}>
-							<Paper>
-								<Typography variant="h4" fontSize={18}>
-									Module Actions
-								</Typography>
-								{onChainInfo && (
-									<>
-										{onChainInfo.methods.map((method) => {
-											return (
-												<Typography key={method.value} variant="body2">
-													{method.value}
-												</Typography>
-											);
-										})}
-									</>
-								)}
-							</Paper>
-						</Grid>
-					</Grid>
+									))}
+								</>
+							)}
+						</Paper>
+					</Box>
 				</Grid>
 			</Grid>
 		</Stack>
