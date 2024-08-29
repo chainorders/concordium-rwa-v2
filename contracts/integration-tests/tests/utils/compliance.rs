@@ -42,13 +42,13 @@ pub fn init_all(
     chain: &mut Chain,
     sender: &Account,
     identity_registry: ContractAddress,
-    nationalities: Vec<String>,
+    nationalities: Vec<&str>,
 ) -> ContractInitSuccess {
     let compliance_module = nationalities_module::init(
         chain,
         sender,
         &concordium_rwa_compliance::compliance_modules::allowed_nationalities::init::InitParams {
-            nationalities,
+            nationalities: nationalities.iter().map(|n| n.to_string()).collect(),
             identity_registry,
         },
     )

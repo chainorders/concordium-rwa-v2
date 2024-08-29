@@ -1,33 +1,25 @@
 //! Rewards for security SFTs
-
 use concordium_cis2::{
     AdditionalData, BurnEvent, Cis2Event, MintEvent, OnReceivingCis2DataParams, Receiver,
     TokenAmountU64, TokenIdVec, TokenMetadataEvent, Transfer,
 };
-use concordium_protocols::concordium_cis2_ext::cis2_client;
+use concordium_protocols::concordium_cis2_ext::{cis2_client, IsTokenAmount, PlusSubOne};
 use concordium_rwa_utils::conversions::exchange_rate::Rate;
 use concordium_rwa_utils::conversions::to_additional_data;
-use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
-use concordium_rwa_utils::state_implementations::cis2_state::ICis2State;
-use concordium_rwa_utils::state_implementations::rewards_state::{
-    AddRewardParam, IRewardTokenState, IRewardsState, RewardDeposited,
-};
-use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
-use concordium_std::ops::Sub;
-use concordium_std::{
-    bail, receive, Address, Get, HasCommonData, HasHost, HasLogger, HasReceiveContext, Host,
-    Logger, ReceiveContext, *,
-};
+use concordium_std::ops::{Sub, SubAssign};
+use concordium_std::*;
 
 use super::error::*;
 use super::state::State;
 use super::types::*;
+use crate::state::{RewardDeposited, RewardTokenState, TokenState};
 
 #[derive(Debug, Serialize, Clone, SchemaType)]
 pub struct TransferAddRewardParams {
-    pub token_contract: ContractAddress,
-    pub token_id:       TokenIdVec,
-    pub data:           AddRewardContractParam,
+    pub reward_token_contract: ContractAddress,
+    pub reward_token_id:       TokenIdVec,
+    pub data:                  AddRewardContractParam,
+    pub token_id:              TokenId,
 }
 
 #[receive(
@@ -40,12 +32,20 @@ pub struct TransferAddRewardParams {
 pub fn transfer_add_reward(ctx: &ReceiveContext, host: &mut Host<State>) -> ContractResult<()> {
     let sender = ctx.sender();
     let state = host.state();
-    ensure!(
-        state.is_agent(&sender, vec![AgentRole::Rewarder]),
-        Error::Unauthorized
+    let is_authorized = state.address(&sender).is_some_and(
+        |a: StateRef<crate::state::AddressState<ExternStateApi>>| {
+            a.is_agent(&[AgentRole::Rewarder])
+        },
     );
+    ensure!(is_authorized, Error::Unauthorized);
+
     let params: TransferAddRewardParams = ctx.parameter_cursor().get()?;
-    let curr_supply: TokenAmount = state.supply_of(&state.tracked_token_id)?;
+    let curr_supply = state
+        .token(&params.token_id)
+        .ok_or(Error::InvalidTokenId)?
+        .reward()
+        .ok_or(Error::InvalidTokenId)?
+        .supply;
     let (rewarded_amount, _) = params.data.rate.convert(&curr_supply.0)?;
     let rewarded_token_amount = TokenAmountU64(rewarded_amount);
     let receive_add_reward_receiver = Receiver::Contract(
@@ -54,8 +54,8 @@ pub fn transfer_add_reward(ctx: &ReceiveContext, host: &mut Host<State>) -> Cont
     );
 
     // this contract should be an operator of the `sender` inside the token contract used for rewards
-    cis2_client::transfer_single(host, params.token_contract, Transfer {
-        token_id: params.token_id,
+    cis2_client::transfer_single(host, &params.reward_token_contract, Transfer {
+        token_id: params.reward_token_id,
         amount:   rewarded_token_amount,
         from:     sender,
         to:       receive_add_reward_receiver,
@@ -90,6 +90,7 @@ pub fn receive_add_reward(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
+    let invoker = ctx.invoker();
     let token_contract = match ctx.sender() {
         Address::Account(_) => bail!(Error::Unauthorized),
         Address::Contract(sender) => sender,
@@ -97,30 +98,53 @@ pub fn receive_add_reward(
     let params: ReceiveAddRewardParam = ctx.parameter_cursor().get()?;
 
     let state = host.state_mut();
-    // Check if the agent / instigator is authorized to add rewards
-    ensure!(
-        state.is_agent(&Address::Account(ctx.invoker()), vec![AgentRole::Rewarder]),
-        Error::Unauthorized
+    let is_authorized = state.address(&Address::Account(invoker)).is_some_and(
+        |a: StateRef<crate::state::AddressState<ExternStateApi>>| {
+            a.is_agent(&[AgentRole::Rewarder])
+        },
     );
-    let param_metadata_url: MetadataUrl = params.data.metadata_url.into();
-    let (old_token_id, new_token_id) =
-        state.add_reward(state.blank_reward_metadata_url.clone(), AddRewardParam {
-            metadata_url: param_metadata_url.clone(),
-            reward:       RewardDeposited {
-                token_id: params.token_id,
-                token_contract,
-                token_amount: params.amount,
-                rate: params.data.rate,
-            },
-        })?;
+    ensure!(is_authorized, Error::Unauthorized);
+    let reward_metadata_url: MetadataUrl = params.data.metadata_url.into();
+    let (min_reward_token_id, max_reward_token_id) = state.rewards_ids_range;
+
+    let (next_token_id, next_token_metadata_url) = {
+        let mut max_reward_token = state
+            .token_mut(&max_reward_token_id)
+            .ok_or(Error::InvalidTokenId)?;
+        let max_reward_token = max_reward_token.reward_mut().ok_or(Error::InvalidTokenId)?;
+        // next token id is the current max reward token id plus one
+        let next_token_id = max_reward_token_id.plus_one();
+        // Copy the existing metadata url to the new token
+        // This metadata url will always be the default metadata url specified at the contract init
+        let next_token_metadata_url = max_reward_token.metadata_url.clone();
+        // Attach incoming reward to the current max reward token
+        max_reward_token.attach_reward(reward_metadata_url.clone(), RewardDeposited {
+            token_id: params.token_id,
+            token_amount: params.amount,
+            token_contract,
+            rate: params.data.rate,
+        });
+
+        (next_token_id, next_token_metadata_url)
+    };
+
+    state.add_token(
+        next_token_id,
+        TokenState::Reward(RewardTokenState {
+            metadata_url: next_token_metadata_url.clone(),
+            reward:       None,
+            supply:       TokenAmount::zero(),
+        }),
+    )?;
+    state.rewards_ids_range = (min_reward_token_id, next_token_id);
 
     logger.log(&Event::Cis2(Cis2Event::TokenMetadata(TokenMetadataEvent {
-        token_id:     old_token_id,
-        metadata_url: param_metadata_url,
+        token_id:     max_reward_token_id,
+        metadata_url: reward_metadata_url,
     })))?;
     logger.log(&Event::Cis2(Cis2Event::TokenMetadata(TokenMetadataEvent {
-        token_id:     new_token_id,
-        metadata_url: state.blank_reward_metadata_url.clone(),
+        token_id:     next_token_id,
+        metadata_url: next_token_metadata_url,
     })))?;
 
     Ok(())
@@ -156,58 +180,100 @@ pub fn claim_rewards(
     ensure!(ctx.sender().eq(&owner_address), Error::Unauthorized);
 
     for claim in params.claims {
-        let (state, state_builder) = host.state_and_builder();
-        // exchange the reward token with the next reward token
+        let curr_reward_token_id = claim.token_id;
+        let next_reward_token_id = claim.token_id.plus_one();
 
-        let reward_token = state.token(&claim.token_id)?.reward();
+        // Calculated the amount of reward token to be burned and amount ot rewarded token to be transferred
+        let (claim_amount, rewarded) = {
+            let curr_reward_token = host
+                .state()
+                .token(&curr_reward_token_id)
+                .ok_or(Error::InvalidTokenId)?;
+            let curr_reward_token = curr_reward_token.reward().ok_or(Error::InvalidTokenId)?;
+            match &curr_reward_token.reward {
+                None => {
+                    // Reward token has no attached rewards
+                    // This can occur if the reward has been removed after attaching it to the token
+                    (claim.amount, None)
+                }
+                Some(deposited_reward) => {
+                    // Reward token has attached rewards
+                    let (rewarded_amount, un_converted_amount) =
+                        deposited_reward.rate.convert(&claim.amount.0)?;
+                    let rewarded_amount = TokenAmountU64(rewarded_amount);
+                    ensure!(
+                        deposited_reward.token_amount.ge(&rewarded_amount),
+                        Error::InsufficientDeposits
+                    );
+                    let claim_amount = claim.amount.sub(TokenAmountU64(un_converted_amount));
+                    (
+                        claim_amount,
+                        Some((deposited_reward.clone(), rewarded_amount)),
+                    )
+                }
+            }
+        };
 
-        // if the reward token has attached rewards.
-        // Upon removing the rewards the token is left but the attached rewards are removed
-        let (claim_amount, burned_token_id, minted_token_id) = if let Some(reward_token) =
-            reward_token
+        let state = host.state_mut();
         {
-            let (rewarded_amount, un_converted_amount) =
-                reward_token.rate.convert(&claim.amount.0)?;
-            let rewarded_amount = TokenAmountU64(rewarded_amount);
-            let claim_amount = claim.amount.sub(TokenAmountU64(un_converted_amount));
-            let new_reward_token_id: TokenId = state.claim_rewards(
-                &claim.token_id,
-                &claim_amount,
-                &owner_address,
-                state_builder,
-            )?;
+            let mut curr_reward_token = state
+                .token_mut(&curr_reward_token_id)
+                .ok_or(Error::InvalidTokenId)?;
+            let curr_reward_token = curr_reward_token
+                .reward_mut()
+                .ok_or(Error::InvalidTokenId)?;
+            curr_reward_token.sub_assign_supply(claim.amount)?;
 
-            state.dec_locked_rewarded_amount(claim.token_id, rewarded_amount)?;
-            cis2_client::transfer_single(host, reward_token.reward_token_contract(), Transfer {
+            if let Some((_, rewarded_amount)) = rewarded {
+                curr_reward_token
+                    .reward
+                    .as_mut()
+                    .ok_or(Error::InvalidTokenId)?
+                    .token_amount
+                    .sub_assign(rewarded_amount);
+            }
+        }
+
+        {
+            state
+                .token_mut(&next_reward_token_id)
+                .ok_or(Error::InvalidTokenId)?
+                .reward_mut()
+                .ok_or(Error::InvalidTokenId)?
+                .add_assign_supply(claim.amount);
+        }
+
+        {
+            let mut holder = state
+                .address_mut(&owner_address)
+                .ok_or(Error::InvalidAddress)?;
+            let holder = holder.holder_mut().ok_or(Error::InvalidAddress)?;
+            let holder = holder.active_mut().ok_or(Error::RecoveredAddress)?;
+            holder.sub_assign_balance(&curr_reward_token_id, claim.amount)?;
+            holder.add_assign_balance(&next_reward_token_id, claim.amount);
+        }
+
+        if let Some((deposits, rewarded_amount)) = rewarded {
+            // Transfer the reward to the owner
+            cis2_client::transfer_single(host, &deposits.token_contract, Transfer {
                 from:     Address::Contract(ctx.self_address()),
                 to:       params.owner.clone(),
-                token_id: reward_token.reward_token_id(),
+                token_id: deposits.token_id,
                 data:     AdditionalData::empty(),
                 amount:   rewarded_amount,
             })?;
-
-            (claim_amount, claim.token_id, new_reward_token_id)
-        } else {
-            let new_reward_token_id: TokenId = state.claim_rewards(
-                &claim.token_id,
-                &claim.amount,
-                &owner_address,
-                state_builder,
-            )?;
-
-            (claim.amount, claim.token_id, new_reward_token_id)
-        };
+        }
 
         // burning the input token
         logger.log(&Event::Cis2(Cis2Event::Burn(BurnEvent {
             amount:   claim_amount,
-            token_id: burned_token_id,
+            token_id: curr_reward_token_id,
             owner:    owner_address,
         })))?;
         // minting the reward token
         logger.log(&Event::Cis2(Cis2Event::Mint(MintEvent {
             amount:   claim_amount,
-            token_id: minted_token_id,
+            token_id: next_reward_token_id,
             owner:    owner_address,
         })))?;
     }

@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use concordium_cis2::{TokenAmountU64, TokenIdUnit, UpdateOperator, UpdateOperatorParams};
 use concordium_smart_contract_testing::*;
 use concordium_std::{Deserial, SchemaType, Serial, Serialize};
@@ -104,6 +106,7 @@ pub fn transfer_single(
     payload: concordium_cis2::Transfer<TokenIdUnit, TokenAmountU64>,
 ) -> ContractInvokeSuccess {
     cis2::transfer_single(chain, sender, contract, CONTRACT_NAME, payload)
+        .expect("euro transfer single")
 }
 
 pub fn balance_of_single(
@@ -120,6 +123,7 @@ pub fn balance_of_single(
         address,
         CONTRACT_NAME,
     )
+    .expect("euro balance of single")
 }
 
 pub fn update_operator(

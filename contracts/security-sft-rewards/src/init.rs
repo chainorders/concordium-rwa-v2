@@ -2,14 +2,12 @@ use concordium_cis2::{Cis2Event, TokenMetadataEvent};
 use concordium_protocols::concordium_cis2_security::{
     AgentUpdatedEvent, ComplianceAdded, IdentityRegistryAdded,
 };
-use concordium_rwa_utils::state_implementations::agent_with_roles_state::IAgentWithRolesState;
-use concordium_rwa_utils::state_implementations::cis2_security_state::ICis2SecurityState;
-use concordium_rwa_utils::state_implementations::tokens_state::ITokensState;
 use concordium_std::*;
 
 use super::error::Error;
 use super::state::State;
-use super::types::{Agent, AgentRole, ContractResult, Event, InitParam};
+use super::types::{AgentRole, ContractResult, Event, InitParam};
+use crate::state::{AddressState, AgentState, MainTokenState, RewardTokenState, TokenState};
 /// Initializes the contract with the given parameters.
 ///
 /// # Returns
@@ -37,36 +35,59 @@ pub fn init(
         Error::InvalidTokenId.into()
     );
     let owner = Address::Account(ctx.init_origin());
-    let state = State::new(
-        params.identity_registry,
-        params.compliance,
-        params.sponsors,
-        // Adds owner as an agent
-        vec![Agent {
-            address: owner,
-            roles:   AgentRole::owner_roles(),
-        }],
-        params.metadata_url.into(),
-        params.blank_reward_metadata_url.into(),
-        params.tracked_token_id,
-        params.min_reward_token_id,
-        state_builder,
-    );
+    let addresses = {
+        let mut addresses = state_builder.new_map();
+        let _ = addresses.insert(
+            owner,
+            AddressState::Agent(AgentState(AgentRole::owner_roles())),
+        );
+        addresses
+    };
+    let tokens = {
+        let mut tokens = state_builder.new_map();
+        let _ = tokens.insert(
+            params.tracked_token_id,
+            TokenState::Main(MainTokenState {
+                metadata_url: params.metadata_url.into(),
+                supply:       0.into(),
+                paused:       false,
+            }),
+        );
+        let _ = tokens.insert(
+            params.min_reward_token_id,
+            TokenState::Reward(RewardTokenState {
+                metadata_url: params.blank_reward_metadata_url.into(),
+                supply:       0.into(),
+                reward:       None,
+            }),
+        );
+        tokens
+    };
+    let state = State {
+        identity_registry: params.identity_registry,
+        compliance: params.compliance,
+        sponsor: params.sponsors,
+        addresses,
+        tokens,
+        rewards_ids_range: (params.min_reward_token_id, params.min_reward_token_id),
+    };
 
     logger.log(&Event::IdentityRegistryAdded(IdentityRegistryAdded(
         state.identity_registry,
     )))?;
     logger.log(&Event::ComplianceAdded(ComplianceAdded(state.compliance)))?;
-    for agent in state.list_agents().iter() {
-        logger.log(&Event::AgentAdded(AgentUpdatedEvent {
-            agent: agent.address,
-            roles: agent.roles.clone(),
-        }))?;
+    for (address, address_state) in state.addresses.iter() {
+        if let Some(agent) = address_state.agent() {
+            logger.log(&Event::AgentAdded(AgentUpdatedEvent {
+                agent: *address,
+                roles: agent.0.clone(),
+            }))?;
+        }
     }
-    for token in state.tokens().iter() {
+    for (token_id, token_state) in state.tokens.iter() {
         logger.log(&Event::Cis2(Cis2Event::TokenMetadata(TokenMetadataEvent {
-            metadata_url: token.1.metadata_url().clone(),
-            token_id:     *token.0,
+            metadata_url: token_state.metadata_url().clone(),
+            token_id:     *token_id,
         })))?;
     }
 
@@ -87,7 +108,7 @@ pub fn identity_registry(
     _: &ReceiveContext,
     host: &Host<State>,
 ) -> ContractResult<ContractAddress> {
-    Ok(host.state().identity_registry())
+    Ok(host.state().identity_registry)
 }
 
 /// Sets the address of the identity registry contract.
@@ -112,17 +133,18 @@ pub fn set_identity_registry(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    let identity_registry: ContractAddress = ctx.parameter_cursor().get()?;
-    ensure!(
-        host.state()
-            .is_agent(&ctx.sender(), vec![AgentRole::SetIdentityRegistry]),
-        Error::Unauthorized
-    );
+    let is_authorized = host
+        .state()
+        .address(&ctx.sender())
+        .is_some_and(|a| a.is_agent(&[AgentRole::SetIdentityRegistry]));
+    ensure!(is_authorized, Error::Unauthorized);
 
-    host.state_mut().set_identity_registry(identity_registry);
+    let identity_registry: ContractAddress = ctx.parameter_cursor().get()?;
+    host.state_mut().identity_registry = identity_registry;
     logger.log(&Event::IdentityRegistryAdded(IdentityRegistryAdded(
         identity_registry,
     )))?;
+
     Ok(())
 }
 
@@ -137,7 +159,7 @@ pub fn set_identity_registry(
     return_value = "ContractAddress"
 )]
 pub fn compliance(_: &ReceiveContext, host: &Host<State>) -> ContractResult<ContractAddress> {
-    Ok(host.state().compliance())
+    Ok(host.state().compliance)
 }
 
 /// Sets the compliance contract address.
@@ -168,14 +190,14 @@ pub fn set_compliance(
     host: &mut Host<State>,
     logger: &mut Logger,
 ) -> ContractResult<()> {
-    let compliance: ContractAddress = ctx.parameter_cursor().get()?;
-    ensure!(
-        host.state()
-            .is_agent(&ctx.sender(), vec![AgentRole::SetCompliance]),
-        Error::Unauthorized
-    );
+    let is_authorized = host
+        .state()
+        .address(&ctx.sender())
+        .is_some_and(|a| a.is_agent(&[AgentRole::SetCompliance]));
+    ensure!(is_authorized, Error::Unauthorized);
 
-    host.state_mut().set_compliance(compliance);
+    let compliance: ContractAddress = ctx.parameter_cursor().get()?;
+    host.state_mut().compliance = compliance;
     logger.log(&Event::ComplianceAdded(ComplianceAdded(compliance)))?;
 
     Ok(())

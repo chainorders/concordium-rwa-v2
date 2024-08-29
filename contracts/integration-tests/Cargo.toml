@@ -10,6 +10,7 @@ concordium-protocols = { path = "../concordium-protocols" }
 concordium-rwa-identity-registry = { path = "../identity-registry" }
 concordium-rwa-compliance = { path = "../compliance" }
 security-sft-rewards = { path = "../security-sft-rewards" }
+security-sft-single = { path = "../security-sft-single" }
 concordium-rwa-market = { path = "../market" }
 rand_core = "0.6.4"
 

@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use concordium_cis2::{
     BalanceOfQuery, BalanceOfQueryParams, BalanceOfQueryResponse, IsTokenAmount, IsTokenId,
     OperatorOfQuery, OperatorOfQueryParams, OperatorOfQueryResponse, TransferParams,
@@ -12,7 +14,7 @@ pub fn balance_of<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &BalanceOfQueryParams<T>,
-) -> BalanceOfQueryResponse<A>
+) -> Result<BalanceOfQueryResponse<A>, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
@@ -32,9 +34,7 @@ where
                 message:      OwnedParameter::from_serial(payload).unwrap(),
             },
         )
-        .expect("balance of")
-        .parse_return_value()
-        .unwrap()
+        .map(|r| r.parse_return_value().unwrap())
 }
 
 pub fn balance_of_single<T, A>(
@@ -44,7 +44,7 @@ pub fn balance_of_single<T, A>(
     token_id: T,
     address: Address,
     contract_name: ContractName,
-) -> A
+) -> Result<A, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount+Copy,
@@ -57,8 +57,8 @@ where
         &BalanceOfQueryParams {
             queries: vec![BalanceOfQuery { address, token_id }],
         },
-    );
-    amounts[0]
+    )?;
+    Ok(amounts[0])
 }
 
 pub fn transfer<T, A>(
@@ -67,28 +67,26 @@ pub fn transfer<T, A>(
     contract: &ContractAddress,
     contract_name: ContractName,
     payload: &TransferParams<T, A>,
-) -> ContractInvokeSuccess
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,
 {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      *contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("transfer"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("transfer")
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      *contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("transfer"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn transfer_single<T, A>(
@@ -97,7 +95,7 @@ pub fn transfer_single<T, A>(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: concordium_cis2::Transfer<T, A>,
-) -> ContractInvokeSuccess
+) -> Result<ContractInvokeSuccess, ContractInvokeError>
 where
     T: IsTokenId,
     A: IsTokenAmount,

@@ -40,7 +40,7 @@ pub fn is_verified(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<b
         let credential_id = identity.credential_id(&issuer);
         let credential_status = match credential_id {
             Some(credential_holder_id) => {
-                cis4_client::credential_status(host, issuer, credential_holder_id)?
+                cis4_client::credential_status(host, &issuer, credential_holder_id)?
             }
             None => return Ok(false),
         };

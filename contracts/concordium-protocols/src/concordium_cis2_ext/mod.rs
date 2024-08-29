@@ -64,6 +64,7 @@ impl From<ContractMetadataUrl> for MetadataUrl {
 
 pub trait PlusSubOne<T> {
     fn plus_one(&self) -> T;
+    fn plus_one_assign(&mut self);
     fn sub_one(&self) -> T;
 }
 
@@ -71,4 +72,6 @@ impl PlusSubOne<TokenIdU32> for TokenIdU32 {
     fn plus_one(&self) -> Self { TokenIdU32(self.0 + 1) }
 
     fn sub_one(&self) -> Self { TokenIdU32(self.0 - 1) }
+
+    fn plus_one_assign(&mut self) { self.0 += 1; }
 }

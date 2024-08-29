@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use concordium_cis2::{IsTokenAmount, IsTokenId, TokenAmountU64, TokenIdVec};
 use concordium_std::{to_bytes, Cursor, Deserial, Serial};
 

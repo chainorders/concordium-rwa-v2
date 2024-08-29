@@ -167,27 +167,6 @@ export type IsIssuerRequest = { index: number; subindex: number };
 export const isIssuerRequestSchemaBase64 = "DA==";
 export type IsIssuerResponse = boolean;
 export const isIssuerResponseSchemaBase64 = "AQ==";
-export type IsSameError =
-	| { ParseError: Record<string, never> }
-	| { LogError: Record<string, never> }
-	| { Unauthorized: Record<string, never> }
-	| { IdentityNotFound: Record<string, never> }
-	| { IssuerNotFound: Record<string, never> }
-	| { IssuerAlreadyExists: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
-	| { AgentNotFound: Record<string, never> }
-	| { InvalidIssuer: Record<string, never> }
-	| { CallContractError: Record<string, never> };
-export const isSameErrorSchemaBase64 =
-	"FQoAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDAAAAFVuYXV0aG9yaXplZAIQAAAASWRlbnRpdHlOb3RGb3VuZAIOAAAASXNzdWVyTm90Rm91bmQCEwAAAElzc3VlckFscmVhZHlFeGlzdHMCEgAAAEFnZW50QWxyZWFkeUV4aXN0cwINAAAAQWdlbnROb3RGb3VuZAINAAAASW52YWxpZElzc3VlcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3IC";
-export type IsSameRequest = [
-	{ Account: [string] } | { Contract: [{ index: number; subindex: number }] },
-	{ Account: [string] } | { Contract: [{ index: number; subindex: number }] },
-];
-export const isSameRequestSchemaBase64 =
-	"DxUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwVAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAM";
-export type IsSameResponse = boolean;
-export const isSameResponseSchemaBase64 = "AQ==";
 export type IsVerifiedError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
@@ -349,7 +328,6 @@ export const ENTRYPOINTS: Record<string, EntrypointName.Type> = {
 	hasIdentity: EntrypointName.fromString("hasIdentity"),
 	isAgent: EntrypointName.fromString("isAgent"),
 	isIssuer: EntrypointName.fromString("isIssuer"),
-	isSame: EntrypointName.fromString("isSame"),
 	isVerified: EntrypointName.fromString("isVerified"),
 	issuers: EntrypointName.fromString("issuers"),
 	registerIdentity: EntrypointName.fromString("registerIdentity"),
@@ -366,7 +344,6 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 	hasIdentity: "Has Identity",
 	isAgent: "Is Agent",
 	isIssuer: "Is Issuer",
-	isSame: "Is Same",
 	isVerified: "Is Verified",
 	issuers: "Issuers",
 	registerIdentity: "Register Identity",
@@ -377,7 +354,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const rwaIdentityRegistry = {
 	init: new InitMethod<void>(
 		ModuleReference.fromHexString(
-			"da40c44a1e9f2ed3faafa0200a8000788dde536cb878be866db35a4fe5976d7f",
+			"de4d9326cad57e18940b24aa986aec75d2d7e18482d9d83c09dfb008a8007a7e",
 		),
 		ContractName.fromString("rwa_identity_registry"),
 	),
@@ -448,13 +425,6 @@ export const rwaIdentityRegistry = {
 		isIssuerRequestSchemaBase64,
 		isIssuerResponseSchemaBase64,
 		isIssuerErrorSchemaBase64,
-	),
-	isSame: new ReceiveMethod<IsSameRequest, IsSameResponse, IsSameError>(
-		ContractName.fromString("rwa_identity_registry"),
-		EntrypointName.fromString("isSame"),
-		isSameRequestSchemaBase64,
-		isSameResponseSchemaBase64,
-		isSameErrorSchemaBase64,
 	),
 	isVerified: new ReceiveMethod<
 		IsVerifiedRequest,

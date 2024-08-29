@@ -10,8 +10,8 @@
     "sponsor",
     "identity-registry",
     "security-sft-rewards",
+    "security-sft-single",
     "market",
-    "sponsor",
     "integration-tests",
     "utils"
   ],

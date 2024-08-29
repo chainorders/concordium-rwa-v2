@@ -64,7 +64,7 @@ pub fn add_issuer(
     );
     let issuer: Issuer = ctx.parameter_cursor().get()?;
     ensure!(
-        cis4_client::supports_cis4(host, issuer)?,
+        cis4_client::supports_cis4(host, &issuer)?,
         Error::InvalidIssuer
     );
     ensure!(

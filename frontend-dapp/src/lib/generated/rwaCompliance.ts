@@ -260,7 +260,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const rwaCompliance = {
 	init: new InitMethod<initRequest>(
 		ModuleReference.fromHexString(
-			"99d787268bc7e51d486b71222d31c114cfef2c385cb7b323c0638a1b4d3c317d",
+			"e1b68fb635881c734a4abed6e5219067189f2f302fa54bd1c7ba5b88e053d81b",
 		),
 		ContractName.fromString("rwa_compliance"),
 		initRequestSchemaBase64,

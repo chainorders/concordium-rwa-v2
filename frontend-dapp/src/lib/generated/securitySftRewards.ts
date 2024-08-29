@@ -15,7 +15,9 @@ export const CONTRACT_NAME = "security_sft_rewards";
 export type initRequest = {
 	identity_registry: { index: number; subindex: number };
 	compliance: { index: number; subindex: number };
-	sponsors: Array<{ index: number; subindex: number }>;
+	sponsors:
+		| { None: Record<string, never> }
+		| { Some: [{ index: number; subindex: number }] };
 	metadata_url: {
 		url: string;
 		hash: { None: Record<string, never> } | { Some: [string] };
@@ -28,32 +30,32 @@ export type initRequest = {
 	min_reward_token_id: string;
 };
 export const initRequestSchemaBase64 =
-	"FAAHAAAAEQAAAGlkZW50aXR5X3JlZ2lzdHJ5DAoAAABjb21wbGlhbmNlDAgAAABzcG9uc29ycxACDAwAAABtZXRhZGF0YV91cmwUAAIAAAADAAAAdXJsFgIEAAAAaGFzaBUCAAAABAAAAE5vbmUCBAAAAFNvbWUBAQAAABYCGQAAAGJsYW5rX3Jld2FyZF9tZXRhZGF0YV91cmwUAAIAAAADAAAAdXJsFgIEAAAAaGFzaBUCAAAABAAAAE5vbmUCBAAAAFNvbWUBAQAAABYCEAAAAHRyYWNrZWRfdG9rZW5faWQdABMAAABtaW5fcmV3YXJkX3Rva2VuX2lkHQA=";
+	"FAAHAAAAEQAAAGlkZW50aXR5X3JlZ2lzdHJ5DAoAAABjb21wbGlhbmNlDAgAAABzcG9uc29ycxUCAAAABAAAAE5vbmUCBAAAAFNvbWUBAQAAAAwMAAAAbWV0YWRhdGFfdXJsFAACAAAAAwAAAHVybBYCBAAAAGhhc2gVAgAAAAQAAABOb25lAgQAAABTb21lAQEAAAAWAhkAAABibGFua19yZXdhcmRfbWV0YWRhdGFfdXJsFAACAAAAAwAAAHVybBYCBAAAAGhhc2gVAgAAAAQAAABOb25lAgQAAABTb21lAQEAAAAWAhAAAAB0cmFja2VkX3Rva2VuX2lkHQATAAAAbWluX3Jld2FyZF90b2tlbl9pZB0A";
 export const initErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type AddAgentError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const addAgentErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type AddAgentRequest = {
 	address:
 		| { Account: [string] }
@@ -75,73 +77,29 @@ export type AddAgentRequest = {
 };
 export const addAgentRequestSchemaBase64 =
 	"FAACAAAABwAAAGFkZHJlc3MVAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAMBQAAAHJvbGVzEAIVDAAAABMAAABTZXRJZGVudGl0eVJlZ2lzdHJ5Ag0AAABTZXRDb21wbGlhbmNlAggAAABBZGRBZ2VudAIEAAAATWludAIKAAAARm9yY2VkQnVybgIOAAAARm9yY2VkVHJhbnNmZXICBgAAAEZyZWV6ZQIIAAAAVW5GcmVlemUCDgAAAEhvbGRlclJlY292ZXJ5AgUAAABQYXVzZQIHAAAAVW5QYXVzZQIIAAAAUmV3YXJkZXIC";
-export type AgentsError =
-	| { ParseError: Record<string, never> }
-	| { LogError: Record<string, never> }
-	| { InvalidTokenId: Record<string, never> }
-	| { InsufficientFunds: Record<string, never> }
-	| { Unauthorized: Record<string, never> }
-	| { UnVerifiedIdentity: Record<string, never> }
-	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
-	| { CallContractError: Record<string, never> }
-	| { PausedToken: Record<string, never> }
-	| { InvalidAmount: Record<string, never> }
-	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
-	| { AgentNotFound: Record<string, never> }
-	| { OnlyAccount: Record<string, never> }
-	| { InvalidDepositData: Record<string, never> }
-	| { Cis2WithdrawError: Record<string, never> }
-	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
-export const agentsErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
-export type AgentsResponse = Array<{
-	address:
-		| { Account: [string] }
-		| { Contract: [{ index: number; subindex: number }] };
-	roles: Array<
-		| { SetIdentityRegistry: Record<string, never> }
-		| { SetCompliance: Record<string, never> }
-		| { AddAgent: Record<string, never> }
-		| { Mint: Record<string, never> }
-		| { ForcedBurn: Record<string, never> }
-		| { ForcedTransfer: Record<string, never> }
-		| { Freeze: Record<string, never> }
-		| { UnFreeze: Record<string, never> }
-		| { HolderRecovery: Record<string, never> }
-		| { Pause: Record<string, never> }
-		| { UnPause: Record<string, never> }
-		| { Rewarder: Record<string, never> }
-	>;
-}>;
-export const agentsResponseSchemaBase64 =
-	"EAIUAAIAAAAHAAAAYWRkcmVzcxUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwFAAAAcm9sZXMQAhUMAAAAEwAAAFNldElkZW50aXR5UmVnaXN0cnkCDQAAAFNldENvbXBsaWFuY2UCCAAAAEFkZEFnZW50AgQAAABNaW50AgoAAABGb3JjZWRCdXJuAg4AAABGb3JjZWRUcmFuc2ZlcgIGAAAARnJlZXplAggAAABVbkZyZWV6ZQIOAAAASG9sZGVyUmVjb3ZlcnkCBQAAAFBhdXNlAgcAAABVblBhdXNlAggAAABSZXdhcmRlcgI=";
 export type BalanceOfError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const balanceOfErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type BalanceOfRequest = Array<{
 	token_id: string;
 	address:
@@ -157,24 +115,24 @@ export type BalanceOfFrozenError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const balanceOfFrozenErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type BalanceOfFrozenRequest = Array<{
 	token_id: string;
 	address:
@@ -190,24 +148,24 @@ export type BalanceOfUnFrozenError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const balanceOfUnFrozenErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type BalanceOfUnFrozenRequest = Array<{
 	token_id: string;
 	address:
@@ -223,24 +181,24 @@ export type BurnError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const burnErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type BurnRequest = Array<{
 	token_id: string;
 	amount: string;
@@ -255,24 +213,24 @@ export type ClaimRewardsError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const claimRewardsErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type ClaimRewardsRequest = {
 	owner:
 		| { Account: [string] }
@@ -288,24 +246,24 @@ export type ForcedBurnError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const forcedBurnErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type ForcedBurnRequest = Array<{
 	token_id: string;
 	amount: string;
@@ -320,24 +278,24 @@ export type ForcedTransferError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const forcedTransferErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type ForcedTransferRequest = Array<{
 	token_id: string;
 	amount: string;
@@ -356,24 +314,24 @@ export type FreezeError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const freezeErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type FreezeRequest = {
 	owner:
 		| { Account: [string] }
@@ -389,24 +347,24 @@ export type IsAgentError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const isAgentErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type IsAgentRequest = {
 	address:
 		| { Account: [string] }
@@ -435,26 +393,27 @@ export type IsPausedError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const isPausedErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
-export type IsPausedRequest = { tokens: Array<string> };
-export const isPausedRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
+export type IsPausedRequest = { tokens: Array<{ token_id: string }> };
+export const isPausedRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type IsPausedResponse = { tokens: Array<boolean> };
 export const isPausedResponseSchemaBase64 = "FAABAAAABgAAAHRva2VucxACAQ==";
 export type MintError =
@@ -462,56 +421,53 @@ export type MintError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const mintErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type MintRequest = {
-	owner:
-		| { Account: [string] }
-		| { Contract: [{ index: number; subindex: number }, string] };
 	token_id: string;
-	amount: string;
+	owners: Array<{ address: string; amount: string }>;
 };
 export const mintRequestSchemaBase64 =
-	"FAADAAAABQAAAG93bmVyFQIAAAAHAAAAQWNjb3VudAEBAAAACwgAAABDb250cmFjdAECAAAADBYBCAAAAHRva2VuX2lkHQAGAAAAYW1vdW50GyUAAAA=";
+	"FAACAAAACAAAAHRva2VuX2lkHQAGAAAAb3duZXJzEAIUAAIAAAAHAAAAYWRkcmVzcwsGAAAAYW1vdW50GyUAAAA=";
 export type OperatorOfError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const operatorOfErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type OperatorOfRequest = Array<{
 	owner:
 		| { Account: [string] }
@@ -529,49 +485,50 @@ export type PauseError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const pauseErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
-export type PauseRequest = { tokens: Array<string> };
-export const pauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
+export type PauseRequest = { tokens: Array<{ token_id: string }> };
+export const pauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type ReceiveAddRewardError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const receiveAddRewardErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type ReceiveAddRewardRequest = {
 	token_id: string;
 	amount: string;
@@ -593,24 +550,24 @@ export type RecoverError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const recoverErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type RecoverRequest = {
 	lost_account:
 		| { Account: [string] }
@@ -626,24 +583,24 @@ export type RecoveryAddressError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const recoveryAddressErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type RecoveryAddressRequest =
 	| { Account: [string] }
 	| { Contract: [{ index: number; subindex: number }] };
@@ -664,24 +621,24 @@ export type RemoveAgentError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const removeAgentErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type RemoveAgentRequest =
 	| { Account: [string] }
 	| { Contract: [{ index: number; subindex: number }] };
@@ -692,24 +649,24 @@ export type SetComplianceError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const setComplianceErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type SetComplianceRequest = { index: number; subindex: number };
 export const setComplianceRequestSchemaBase64 = "DA==";
 export type SetIdentityRegistryError =
@@ -717,24 +674,24 @@ export type SetIdentityRegistryError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const setIdentityRegistryErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type SetIdentityRegistryRequest = { index: number; subindex: number };
 export const setIdentityRegistryRequestSchemaBase64 = "DA==";
 export type SupportsError =
@@ -742,24 +699,24 @@ export type SupportsError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const supportsErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type SupportsRequest = Array<string>;
 export const supportsRequestSchemaBase64 = "EAEWAA==";
 export type SupportsResponse = Array<
@@ -774,24 +731,24 @@ export type TokenMetadataError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const tokenMetadataErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type TokenMetadataRequest = Array<string>;
 export const tokenMetadataRequestSchemaBase64 = "EAEdAA==";
 export type TokenMetadataResponse = Array<{
@@ -805,24 +762,24 @@ export type TransferError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const transferErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type TransferRequest = Array<{
 	token_id: string;
 	amount: string;
@@ -841,27 +798,27 @@ export type TransferAddRewardError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const transferAddRewardErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type TransferAddRewardRequest = {
-	token_contract: { index: number; subindex: number };
-	token_id: string;
+	reward_token_contract: { index: number; subindex: number };
+	reward_token_id: string;
 	data: {
 		metadata_url: {
 			url: string;
@@ -869,32 +826,33 @@ export type TransferAddRewardRequest = {
 		};
 		rate: { numerator: bigint; denominator: bigint };
 	};
+	token_id: string;
 };
 export const transferAddRewardRequestSchemaBase64 =
-	"FAADAAAADgAAAHRva2VuX2NvbnRyYWN0DAgAAAB0b2tlbl9pZB0ABAAAAGRhdGEUAAIAAAAMAAAAbWV0YWRhdGFfdXJsFAACAAAAAwAAAHVybBYCBAAAAGhhc2gVAgAAAAQAAABOb25lAgQAAABTb21lAQEAAAAWAgQAAAByYXRlFAACAAAACQAAAG51bWVyYXRvcgULAAAAZGVub21pbmF0b3IF";
+	"FAAEAAAAFQAAAHJld2FyZF90b2tlbl9jb250cmFjdAwPAAAAcmV3YXJkX3Rva2VuX2lkHQAEAAAAZGF0YRQAAgAAAAwAAABtZXRhZGF0YV91cmwUAAIAAAADAAAAdXJsFgIEAAAAaGFzaBUCAAAABAAAAE5vbmUCBAAAAFNvbWUBAQAAABYCBAAAAHJhdGUUAAIAAAAJAAAAbnVtZXJhdG9yBQsAAABkZW5vbWluYXRvcgUIAAAAdG9rZW5faWQdAA==";
 export type UnFreezeError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const unFreezeErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type UnFreezeRequest = {
 	owner:
 		| { Account: [string] }
@@ -908,49 +866,50 @@ export type UnPauseError =
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const unPauseErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
-export type UnPauseRequest = { tokens: Array<string> };
-export const unPauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
+export type UnPauseRequest = { tokens: Array<{ token_id: string }> };
+export const unPauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type UpdateOperatorError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
 	| { InvalidTokenId: Record<string, never> }
 	| { InsufficientFunds: Record<string, never> }
+	| { InsufficientRewardFunds: Record<string, never> }
 	| { Unauthorized: Record<string, never> }
 	| { UnVerifiedIdentity: Record<string, never> }
 	| { InCompliantTransfer: Record<string, never> }
-	| { ComplianceError: Record<string, never> }
 	| { CallContractError: Record<string, never> }
 	| { PausedToken: Record<string, never> }
 	| { InvalidAmount: Record<string, never> }
 	| { InvalidAddress: Record<string, never> }
-	| { AgentAlreadyExists: Record<string, never> }
 	| { AgentNotFound: Record<string, never> }
 	| { OnlyAccount: Record<string, never> }
 	| { InvalidDepositData: Record<string, never> }
 	| { Cis2WithdrawError: Record<string, never> }
 	| { InsufficientDeposits: Record<string, never> }
-	| { NotDeposited: Record<string, never> }
-	| { InvalidRewardRate: Record<string, never> };
+	| { InvalidRewardRate: Record<string, never> }
+	| { RecoveredAddress: Record<string, never> }
+	| { InvalidRewardTokenId: Record<string, never> };
 export const updateOperatorErrorSchemaBase64 =
-	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIMAAAAVW5hdXRob3JpemVkAhIAAABVblZlcmlmaWVkSWRlbnRpdHkCEwAAAEluQ29tcGxpYW50VHJhbnNmZXICDwAAAENvbXBsaWFuY2VFcnJvcgIRAAAAQ2FsbENvbnRyYWN0RXJyb3ICCwAAAFBhdXNlZFRva2VuAg0AAABJbnZhbGlkQW1vdW50Ag4AAABJbnZhbGlkQWRkcmVzcwISAAAAQWdlbnRBbHJlYWR5RXhpc3RzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCDAAAAE5vdERlcG9zaXRlZAIRAAAASW52YWxpZFJld2FyZFJhdGUC";
+	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
 export type UpdateOperatorRequest = Array<{
 	update: { Remove: Record<string, never> } | { Add: Record<string, never> };
 	operator:
@@ -1100,7 +1059,6 @@ export const eventSchemaBase64 =
 	"Hw4AAADyCQAAAFJlY292ZXJlZAEBAAAAFAACAAAADAAAAGxvc3RfYWNjb3VudBUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwLAAAAbmV3X2FjY291bnQVAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAM8xUAAABJZGVudGl0eVJlZ2lzdHJ5QWRkZWQBAQAAAAz0DwAAAENvbXBsaWFuY2VBZGRlZAEBAAAADPUIAAAAVW5QYXVzZWQBAQAAABQAAQAAAAgAAAB0b2tlbl9pZB0A9gYAAABQYXVzZWQBAQAAABQAAQAAAAgAAAB0b2tlbl9pZB0A9wsAAABUb2tlbkZyb3plbgEBAAAAFAADAAAACAAAAHRva2VuX2lkHQAGAAAAYW1vdW50GyUAAAAHAAAAYWRkcmVzcxUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAz4DQAAAFRva2VuVW5Gcm96ZW4BAQAAABQAAwAAAAgAAAB0b2tlbl9pZB0ABgAAAGFtb3VudBslAAAABwAAAGFkZHJlc3MVAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAM+QwAAABBZ2VudFJlbW92ZWQBAQAAABQAAgAAAAUAAABhZ2VudBUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwFAAAAcm9sZXMQAhUMAAAAEwAAAFNldElkZW50aXR5UmVnaXN0cnkCDQAAAFNldENvbXBsaWFuY2UCCAAAAEFkZEFnZW50AgQAAABNaW50AgoAAABGb3JjZWRCdXJuAg4AAABGb3JjZWRUcmFuc2ZlcgIGAAAARnJlZXplAggAAABVbkZyZWV6ZQIOAAAASG9sZGVyUmVjb3ZlcnkCBQAAAFBhdXNlAgcAAABVblBhdXNlAggAAABSZXdhcmRlcgL6CgAAAEFnZW50QWRkZWQBAQAAABQAAgAAAAUAAABhZ2VudBUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwFAAAAcm9sZXMQAhUMAAAAEwAAAFNldElkZW50aXR5UmVnaXN0cnkCDQAAAFNldENvbXBsaWFuY2UCCAAAAEFkZEFnZW50AgQAAABNaW50AgoAAABGb3JjZWRCdXJuAg4AAABGb3JjZWRUcmFuc2ZlcgIGAAAARnJlZXplAggAAABVbkZyZWV6ZQIOAAAASG9sZGVyUmVjb3ZlcnkCBQAAAFBhdXNlAgcAAABVblBhdXNlAggAAABSZXdhcmRlcgL7DQAAAFRva2VuTWV0YWRhdGEAAgAAAAgAAAB0b2tlbl9pZB0ADAAAAG1ldGFkYXRhX3VybBQAAgAAAAMAAAB1cmwWAQQAAABoYXNoFQIAAAAEAAAATm9uZQIEAAAAU29tZQEBAAAAHiAAAAD8DgAAAFVwZGF0ZU9wZXJhdG9yAAMAAAAGAAAAdXBkYXRlFQIAAAAGAAAAUmVtb3ZlAgMAAABBZGQCBQAAAG93bmVyFQIAAAAHAAAAQWNjb3VudAEBAAAACwgAAABDb250cmFjdAEBAAAADAgAAABvcGVyYXRvchUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAz9BAAAAEJ1cm4AAwAAAAgAAAB0b2tlbl9pZB0ABgAAAGFtb3VudBslAAAABQAAAG93bmVyFQIAAAAHAAAAQWNjb3VudAEBAAAACwgAAABDb250cmFjdAEBAAAADP4EAAAATWludAADAAAACAAAAHRva2VuX2lkHQAGAAAAYW1vdW50GyUAAAAFAAAAb3duZXIVAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAM/wgAAABUcmFuc2ZlcgAEAAAACAAAAHRva2VuX2lkHQAGAAAAYW1vdW50GyUAAAAEAAAAZnJvbRUCAAAABwAAAEFjY291bnQBAQAAAAsIAAAAQ29udHJhY3QBAQAAAAwCAAAAdG8VAgAAAAcAAABBY2NvdW50AQEAAAALCAAAAENvbnRyYWN0AQEAAAAM";
 export const ENTRYPOINTS: Record<string, EntrypointName.Type> = {
 	addAgent: EntrypointName.fromString("addAgent"),
-	agents: EntrypointName.fromString("agents"),
 	balanceOf: EntrypointName.fromString("balanceOf"),
 	balanceOfFrozen: EntrypointName.fromString("balanceOfFrozen"),
 	balanceOfUnFrozen: EntrypointName.fromString("balanceOfUnFrozen"),
@@ -1132,7 +1090,6 @@ export const ENTRYPOINTS: Record<string, EntrypointName.Type> = {
 };
 export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 	addAgent: "Add Agent",
-	agents: "Agents",
 	balanceOf: "Balance Of",
 	balanceOfFrozen: "Balance Of Frozen",
 	balanceOfUnFrozen: "Balance Of Un Frozen",
@@ -1165,7 +1122,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const securitySftRewards = {
 	init: new InitMethod<initRequest>(
 		ModuleReference.fromHexString(
-			"d1394811ec4771c54e6a52ef25f3c0b95b7274ac98639456d266d595b1e20b03",
+			"64f6727a690153ba06a5dfab535c2b5349d83ece67e00c25c4289ec69130d130",
 		),
 		ContractName.fromString("security_sft_rewards"),
 		initRequestSchemaBase64,
@@ -1176,13 +1133,6 @@ export const securitySftRewards = {
 		addAgentRequestSchemaBase64,
 		undefined,
 		addAgentErrorSchemaBase64,
-	),
-	agents: new ReceiveMethod<never, AgentsResponse, AgentsError>(
-		ContractName.fromString("security_sft_rewards"),
-		EntrypointName.fromString("agents"),
-		undefined,
-		agentsResponseSchemaBase64,
-		agentsErrorSchemaBase64,
 	),
 	balanceOf: new ReceiveMethod<
 		BalanceOfRequest,

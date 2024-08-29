@@ -60,7 +60,7 @@ impl<E: Deserial, R: Read> TryFrom<CallContractError<R>> for ContractClientError
 #[inline(always)]
 pub fn supports<State: Serial+DeserialWithState<ExternStateApi>>(
     host: &Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     identifier: StandardIdentifier,
 ) -> Result<bool, ContractClientError<()>> {
     let parameter = SupportsQueryParams {
@@ -100,11 +100,11 @@ pub fn invoke_contract_read_only<
     E: Deserial,
 >(
     host: &Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     method: EntrypointName,
     parameter: &P,
 ) -> Result<R, ContractClientError<E>> {
-    let res = host.invoke_contract_read_only(&contract, parameter, method, Amount::from_ccd(0));
+    let res = host.invoke_contract_read_only(contract, parameter, method, Amount::from_ccd(0));
 
     let res = match res {
         Ok(res) => res,
@@ -126,11 +126,11 @@ pub fn invoke_contract_read_only<
 
 pub fn invoke_contract<State: Serial+DeserialWithState<ExternStateApi>, P: Serial, R: Deserial>(
     host: &mut Host<State>,
-    contract: ContractAddress,
+    contract: &ContractAddress,
     method: EntrypointName,
     parameter: &P,
 ) -> Result<R, ContractClientError<()>> {
-    let res = host.invoke_contract(&contract, parameter, method, Amount::from_ccd(0));
+    let res = host.invoke_contract(contract, parameter, method, Amount::from_ccd(0));
     let (_, res) = match res {
         Ok(res) => res,
         Err(err) => {

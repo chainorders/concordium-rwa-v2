@@ -18,7 +18,7 @@ fn can_transfer(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<bool
     let params: CanTransferParam<TokenId, TokenAmount> = ctx.parameter_cursor().get()?;
     let state = host.state();
 
-    let id = identity_registry_client::get_identity(host, state.identity_registry(), params.to)?;
+    let id = identity_registry_client::get_identity(host, &state.identity_registry(), params.to)?;
     for IdentityAttribute { tag, value } in id.attributes {
         if tag.eq(&NATIONALITY.0) {
             return Ok(state.is_allowed(value));
