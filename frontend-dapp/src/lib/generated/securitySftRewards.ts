@@ -411,8 +411,9 @@ export type IsPausedError =
 	| { InvalidRewardTokenId: Record<string, never> };
 export const isPausedErrorSchemaBase64 =
 	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
-export type IsPausedRequest = { tokens: Array<string> };
-export const isPausedRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type IsPausedRequest = { tokens: Array<{ token_id: string }> };
+export const isPausedRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type IsPausedResponse = { tokens: Array<boolean> };
 export const isPausedResponseSchemaBase64 = "FAABAAAABgAAAHRva2VucxACAQ==";
 export type MintError =
@@ -502,8 +503,9 @@ export type PauseError =
 	| { InvalidRewardTokenId: Record<string, never> };
 export const pauseErrorSchemaBase64 =
 	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
-export type PauseRequest = { tokens: Array<string> };
-export const pauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type PauseRequest = { tokens: Array<{ token_id: string }> };
+export const pauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type ReceiveAddRewardError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
@@ -882,8 +884,9 @@ export type UnPauseError =
 	| { InvalidRewardTokenId: Record<string, never> };
 export const unPauseErrorSchemaBase64 =
 	"FRQAAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAg0AAABBZ2VudE5vdEZvdW5kAgsAAABPbmx5QWNjb3VudAISAAAASW52YWxpZERlcG9zaXREYXRhAhEAAABDaXMyV2l0aGRyYXdFcnJvcgIUAAAASW5zdWZmaWNpZW50RGVwb3NpdHMCEQAAAEludmFsaWRSZXdhcmRSYXRlAhAAAABSZWNvdmVyZWRBZGRyZXNzAhQAAABJbnZhbGlkUmV3YXJkVG9rZW5JZAI=";
-export type UnPauseRequest = { tokens: Array<string> };
-export const unPauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type UnPauseRequest = { tokens: Array<{ token_id: string }> };
+export const unPauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type UpdateOperatorError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
@@ -1119,7 +1122,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const securitySftRewards = {
 	init: new InitMethod<initRequest>(
 		ModuleReference.fromHexString(
-			"7cd7e9b9d328bdc910bbd81e5b72267477a621224dd7d118604c85719446b00c",
+			"64f6727a690153ba06a5dfab535c2b5349d83ece67e00c25c4289ec69130d130",
 		),
 		ContractName.fromString("security_sft_rewards"),
 		initRequestSchemaBase64,

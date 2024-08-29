@@ -3919,12 +3919,23 @@ export const isPausedRequestJsonSchema: RJSFSchema = {
 	properties: {
 		tokens: {
 			type: "array",
-			items: { type: "string", title: "", default: "", format: "byte" },
+			items: {
+				type: "object",
+				title: "",
+				properties: {
+					token_id: {
+						type: "string",
+						title: "Token Id",
+						default: "",
+						format: "byte",
+					},
+				},
+			},
 			title: "Tokens",
 		},
 	},
 };
-export type IsPausedRequestUi = { tokens: string[] };
+export type IsPausedRequestUi = { tokens: { token_id: string }[] };
 export const isPausedResponseJsonSchema: RJSFSchema = {
 	type: "object",
 	title: "Is Paused Response",
@@ -4822,12 +4833,23 @@ export const pauseRequestJsonSchema: RJSFSchema = {
 	properties: {
 		tokens: {
 			type: "array",
-			items: { type: "string", title: "", default: "", format: "byte" },
+			items: {
+				type: "object",
+				title: "",
+				properties: {
+					token_id: {
+						type: "string",
+						title: "Token Id",
+						default: "",
+						format: "byte",
+					},
+				},
+			},
 			title: "Tokens",
 		},
 	},
 };
-export type PauseRequestUi = { tokens: string[] };
+export type PauseRequestUi = { tokens: { token_id: string }[] };
 export const pauseErrorJsonSchema: RJSFSchema = {
 	type: "object",
 	title: "Pause Error",
@@ -8586,12 +8608,23 @@ export const unPauseRequestJsonSchema: RJSFSchema = {
 	properties: {
 		tokens: {
 			type: "array",
-			items: { type: "string", title: "", default: "", format: "byte" },
+			items: {
+				type: "object",
+				title: "",
+				properties: {
+					token_id: {
+						type: "string",
+						title: "Token Id",
+						default: "",
+						format: "byte",
+					},
+				},
+			},
 			title: "Tokens",
 		},
 	},
 };
-export type UnPauseRequestUi = { tokens: string[] };
+export type UnPauseRequestUi = { tokens: { token_id: string }[] };
 export const unPauseErrorJsonSchema: RJSFSchema = {
 	type: "object",
 	title: "Un Pause Error",

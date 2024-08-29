@@ -312,8 +312,9 @@ export type IsPausedError =
 	| { RecoveredAddress: Record<string, never> };
 export const isPausedErrorSchemaBase64 =
 	"FQ4AAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAhEAAABJbnZhbGlkUmV3YXJkUmF0ZQIQAAAAUmVjb3ZlcmVkQWRkcmVzcwI=";
-export type IsPausedRequest = { tokens: Array<string> };
-export const isPausedRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type IsPausedRequest = { tokens: Array<{ token_id: string }> };
+export const isPausedRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type IsPausedResponse = { tokens: Array<boolean> };
 export const isPausedResponseSchemaBase64 = "FAABAAAABgAAAHRva2VucxACAQ==";
 export type MintError =
@@ -385,8 +386,9 @@ export type PauseError =
 	| { RecoveredAddress: Record<string, never> };
 export const pauseErrorSchemaBase64 =
 	"FQ4AAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAhEAAABJbnZhbGlkUmV3YXJkUmF0ZQIQAAAAUmVjb3ZlcmVkQWRkcmVzcwI=";
-export type PauseRequest = { tokens: Array<string> };
-export const pauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type PauseRequest = { tokens: Array<{ token_id: string }> };
+export const pauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type RecoverError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
@@ -629,8 +631,9 @@ export type UnPauseError =
 	| { RecoveredAddress: Record<string, never> };
 export const unPauseErrorSchemaBase64 =
 	"FQ4AAAAKAAAAUGFyc2VFcnJvcgIIAAAATG9nRXJyb3ICDgAAAEludmFsaWRUb2tlbklkAhEAAABJbnN1ZmZpY2llbnRGdW5kcwIXAAAASW5zdWZmaWNpZW50UmV3YXJkRnVuZHMCDAAAAFVuYXV0aG9yaXplZAISAAAAVW5WZXJpZmllZElkZW50aXR5AhMAAABJbkNvbXBsaWFudFRyYW5zZmVyAhEAAABDYWxsQ29udHJhY3RFcnJvcgILAAAAUGF1c2VkVG9rZW4CDQAAAEludmFsaWRBbW91bnQCDgAAAEludmFsaWRBZGRyZXNzAhEAAABJbnZhbGlkUmV3YXJkUmF0ZQIQAAAAUmVjb3ZlcmVkQWRkcmVzcwI=";
-export type UnPauseRequest = { tokens: Array<string> };
-export const unPauseRequestSchemaBase64 = "FAABAAAABgAAAHRva2VucxACHQA=";
+export type UnPauseRequest = { tokens: Array<{ token_id: string }> };
+export const unPauseRequestSchemaBase64 =
+	"FAABAAAABgAAAHRva2VucxACFAABAAAACAAAAHRva2VuX2lkHQA=";
 export type UpdateOperatorError =
 	| { ParseError: Record<string, never> }
 	| { LogError: Record<string, never> }
@@ -852,7 +855,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const securitySftSingle = {
 	init: new InitMethod<initRequest>(
 		ModuleReference.fromHexString(
-			"5b599519c7279d07a5efe2788bfd04585c92f665899e7ebe17caafaaa97ff53d",
+			"2933f821ebea15a38ebcb8d9f150ecefc94e5cf8677bc9e2488c732e5d343e86",
 		),
 		ContractName.fromString("security_sft_single"),
 		initRequestSchemaBase64,
