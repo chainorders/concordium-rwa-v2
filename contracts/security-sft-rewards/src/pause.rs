@@ -36,7 +36,7 @@ pub fn pause(
     ensure!(is_authorized, Error::Unauthorized);
 
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
-    for token_id in tokens {
+    for PauseParam { token_id } in tokens {
         state
             .token_mut(&token_id)
             .ok_or(Error::InvalidTokenId)?
@@ -80,7 +80,7 @@ pub fn un_pause(
     ensure!(is_authorized, Error::Unauthorized);
 
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
-    for token_id in tokens {
+    for PauseParam { token_id } in tokens {
         state
             .token_mut(&token_id)
             .ok_or(Error::InvalidTokenId)?
@@ -117,7 +117,7 @@ pub fn is_paused(ctx: &ReceiveContext, host: &Host<State>) -> ContractResult<IsP
     };
 
     let state = host.state();
-    for token_id in tokens {
+    for PauseParam { token_id } in tokens {
         let is_paused = match state.token(&token_id).ok_or(Error::InvalidTokenId)?.main() {
             None => false,
             Some(token) => token.paused,

@@ -857,16 +857,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "concordium-rwa-market"
-version = "0.1.0"
-dependencies = [
- "concordium-cis2",
- "concordium-protocols",
- "concordium-rwa-utils",
- "concordium-std",
-]
-
-[[package]]
 name = "concordium-rwa-utils"
 version = "0.1.0"
 dependencies = [
@@ -1012,7 +1002,6 @@ dependencies = [
  "concordium-protocols",
  "concordium-rust-sdk",
  "concordium-rwa-identity-registry",
- "concordium-rwa-market",
  "concordium-rwa-utils",
  "concordium_rwa_backend_shared",
  "diesel",

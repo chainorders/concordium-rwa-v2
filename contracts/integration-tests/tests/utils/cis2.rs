@@ -115,24 +115,22 @@ pub fn update_operator(
     contract: ContractAddress,
     contract_name: ContractName,
     payload: &concordium_cis2::UpdateOperatorParams,
-) -> ContractInvokeSuccess {
-    chain
-        .contract_update(
-            Signer::with_one_key(),
-            sender.address,
-            sender.address.into(),
-            MAX_ENERGY,
-            UpdateContractPayload {
-                address:      contract,
-                amount:       Amount::zero(),
-                receive_name: OwnedReceiveName::construct_unchecked(
-                    contract_name,
-                    EntrypointName::new_unchecked("updateOperator"),
-                ),
-                message:      OwnedParameter::from_serial(payload).unwrap(),
-            },
-        )
-        .expect("update_operator")
+) -> Result<ContractInvokeSuccess, ContractInvokeError> {
+    chain.contract_update(
+        Signer::with_one_key(),
+        sender.address,
+        sender.address.into(),
+        MAX_ENERGY,
+        UpdateContractPayload {
+            address:      contract,
+            amount:       Amount::zero(),
+            receive_name: OwnedReceiveName::construct_unchecked(
+                contract_name,
+                EntrypointName::new_unchecked("updateOperator"),
+            ),
+            message:      OwnedParameter::from_serial(payload).unwrap(),
+        },
+    )
 }
 
 pub fn operator_of(

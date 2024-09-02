@@ -79,15 +79,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"concordium-rwa-market@workspace:contracts/market":
-  version: 0.0.0-use.local
-  resolution: "concordium-rwa-market@workspace:contracts/market"
-  languageName: unknown
-  linkType: soft
-
 "concordium-rwa@workspace:.":
   version: 0.0.0-use.local
   resolution: "concordium-rwa@workspace:."
+  languageName: unknown
+  linkType: soft
+
+"concordium-security-mint-fund@workspace:contracts/security-mint-fund":
+  version: 0.0.0-use.local
+  resolution: "concordium-security-mint-fund@workspace:contracts/security-mint-fund"
+  languageName: unknown
+  linkType: soft
+
+"concordium-security-p2p-trading@workspace:contracts/security-p2p-trading":
+  version: 0.0.0-use.local
+  resolution: "concordium-security-p2p-trading@workspace:contracts/security-p2p-trading"
   languageName: unknown
   linkType: soft
 

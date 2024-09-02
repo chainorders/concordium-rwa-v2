@@ -3,4 +3,5 @@ pub mod concordium_cis2_security;
 pub mod concordium_cis3;
 pub mod concordium_cis4;
 pub mod concordium_global_sponsor;
+pub mod rate;
 mod contract_client;

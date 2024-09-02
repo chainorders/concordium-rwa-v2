@@ -1,5 +1,5 @@
 use concordium_protocols::concordium_cis2_security::identity_registry_client::IdentityRegistryClientError;
-use concordium_rwa_utils::conversions::exchange_rate::ExchangeError;
+use concordium_protocols::rate::ExchangeError;
 use concordium_std::num::NonZeroI32;
 use concordium_std::{CallContractError, LogError, ParseError, Reject, SchemaType};
 

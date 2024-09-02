@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use concordium_cis2::TransferParams;
+use concordium_cis2::{TransferParams, UpdateOperator, UpdateOperatorParams};
 use concordium_smart_contract_testing::*;
 use security_sft_single::types::*;
 
@@ -235,4 +235,27 @@ pub fn pause(
     payload: &PauseParams,
 ) -> Result<ContractInvokeSuccess, ContractInvokeError> {
     cis2_security::pause(chain, sender, contract, CONTRACT_NAME, payload)
+}
+
+pub fn update_operator(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: &UpdateOperatorParams,
+) -> Result<ContractInvokeSuccess, ContractInvokeError> {
+    cis2::update_operator(chain, sender, contract, CONTRACT_NAME, payload)
+}
+
+pub fn update_operator_single(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: UpdateOperator,
+) -> Result<ContractInvokeSuccess, ContractInvokeError> {
+    update_operator(
+        chain,
+        sender,
+        contract,
+        &UpdateOperatorParams(vec![payload]),
+    )
 }

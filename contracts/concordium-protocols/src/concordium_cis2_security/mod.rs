@@ -1,3 +1,4 @@
+pub mod cis2_security_client;
 pub mod compliance_client;
 mod event;
 pub mod identity_registry_client;

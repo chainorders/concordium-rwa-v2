@@ -7,14 +7,12 @@
 //! generate the API client. It also includes helper functions to create the
 //! listener, server routes, and service for the contracts API.
 pub mod rwa_identity_registry;
-pub mod rwa_market;
 pub mod rwa_security_cis2;
 
 use poem_openapi::OpenApiService;
-use rwa_market::api::RwaMarketApi;
 use rwa_security_cis2::api::Cis2Api;
 
 /// Creates the service for the contracts API.
-pub fn create_service() -> OpenApiService<(RwaMarketApi, Cis2Api), ()> {
-    OpenApiService::new((RwaMarketApi, Cis2Api), "RWA Contracts API", "1.0.0")
+pub fn create_service() -> OpenApiService<Cis2Api, ()> {
+    OpenApiService::new(Cis2Api, "RWA Contracts API", "1.0.0")
 }

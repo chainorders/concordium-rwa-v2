@@ -5,15 +5,14 @@ volumes:
   cargo:
   rustup:
 
+
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        # Use the VARIANT arg to pick a Debian OS version: buster, bullseye
-        # Use bullseye when on local on arm64/Apple Silicon.
-        VARIANT: bullseye
+        VARIANT: bookworm # use bullseye on apple silicon
         CARGO_HOME: /usr/local/cargo
         RUSTUP_HOME: /usr/local/rustup
     env_file:

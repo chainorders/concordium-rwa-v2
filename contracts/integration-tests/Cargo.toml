@@ -11,7 +11,8 @@ concordium-rwa-identity-registry = { path = "../identity-registry" }
 concordium-rwa-compliance = { path = "../compliance" }
 security-sft-rewards = { path = "../security-sft-rewards" }
 security-sft-single = { path = "../security-sft-single" }
-concordium-rwa-market = { path = "../market" }
+security-p2p-trading = { path = "../security-p2p-trading" }
+security-mint-fund = { path = "../security-mint-fund" }
 rand_core = "0.6.4"
 
 [dev-dependencies]

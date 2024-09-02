@@ -1,0 +1,24 @@
+[package]
+name = "security-mint-fund"
+version = "0.1.0"
+authors = ["Stactrace Solutions <parv@stactrace.com>"]
+edition = "2021"
+license = "MPL-2.0"
+
+[features]
+default = ["std"]
+std = ["concordium-std/std", "concordium-cis2/std"]
+
+[dependencies]
+concordium-std = { version = "10.1.0", default-features = false }
+concordium-cis2 = { version = "6.1.0", default-features = false }
+concordium-rwa-utils = { path = "../utils" }
+concordium-protocols = { path = "../concordium-protocols" }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+opt-level = "s"

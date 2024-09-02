@@ -9,7 +9,7 @@ use concordium_cis2::{
 };
 use concordium_protocols::concordium_cis2_ext::PlusSubOne;
 use concordium_protocols::concordium_cis2_security::{AgentWithRoles, MintParam};
-use concordium_rwa_market::types::Rate;
+use concordium_protocols::rate::Rate;
 use concordium_smart_contract_testing::*;
 use security_sft_rewards::rewards::{
     AddRewardContractParam, ClaimRewardsParam, ClaimRewardsParams, TransferAddRewardParams,

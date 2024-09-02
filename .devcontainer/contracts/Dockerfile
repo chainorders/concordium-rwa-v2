@@ -18,7 +18,7 @@ RUN rustup update \
 && rustup component add rustfmt \
 && rustup target add wasm32-unknown-unknown \
 && rustup toolchain install nightly-2023-04-01 \
-&& rustup component add --toolchain nightly-2023-04-01-x86_64-unknown-linux-gnu rustfmt \
+&& rustup component add --toolchain nightly-2023-04-01 rustfmt \
 && cargo install --locked cargo-concordium
 
 ADD "https://distribution.concordium.software/tools/linux/concordium-client_6.3.0-1" /usr/local/bin/concordium-client

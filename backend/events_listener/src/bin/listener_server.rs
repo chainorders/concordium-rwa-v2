@@ -10,7 +10,6 @@ use concordium_rwa_events_listener::txn_listener::{
     EventsProcessor, ListenerError, TransactionsListener,
 };
 use concordium_rwa_events_listener::txn_processor::rwa_identity_registry::processor::RwaIdentityRegistryProcessor;
-use concordium_rwa_events_listener::txn_processor::rwa_market::processor::RwaMarketProcessor;
 use concordium_rwa_events_listener::txn_processor::rwa_security_cis2::processor::RwaSecurityCIS2Processor;
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
@@ -106,17 +105,6 @@ async fn main() -> Result<(), Error> {
     );
     let security_sft_rewards_contract_name: OwnedContractName =
         OwnedContractName::new_unchecked("init_security_sft_rewards".to_string());
-    let market_module = WasmModule::from_slice(include_bytes!(
-        "../../../../contracts/market/contract.wasm.v1"
-    ))
-    .unwrap();
-    info!(
-        "Market Module Reference: {:?}",
-        market_module.get_module_ref()
-    );
-    let market_contract_name: OwnedContractName =
-        OwnedContractName::new_unchecked("init_rwa_market".to_string());
-
     let identity_registry_processor = RwaIdentityRegistryProcessor {
         module_ref:    ir_module.get_module_ref(),
         contract_name: ir_contract_name,
@@ -127,15 +115,9 @@ async fn main() -> Result<(), Error> {
         security_sft_rewards_module.get_module_ref(),
         security_sft_rewards_contract_name,
     );
-    let market_processor = RwaMarketProcessor {
-        pool:          pool.clone(),
-        module_ref:    market_module.get_module_ref(),
-        contract_name: market_contract_name,
-    };
     let processors: Vec<Arc<RwLock<dyn EventsProcessor>>> = vec![
         Arc::new(RwLock::new(identity_registry_processor)),
         Arc::new(RwLock::new(security_sft_processor)),
-        Arc::new(RwLock::new(market_processor)),
     ];
     let listener = TransactionsListener::new(
         concordium_client,

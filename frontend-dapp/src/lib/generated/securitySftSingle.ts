@@ -855,7 +855,7 @@ export const ENTRYPOINT_DISPLAY_NAMES: Record<string, string> = {
 export const securitySftSingle = {
 	init: new InitMethod<initRequest>(
 		ModuleReference.fromHexString(
-			"2933f821ebea15a38ebcb8d9f150ecefc94e5cf8677bc9e2488c732e5d343e86",
+			"5518b9ead8e9adc895ccaad42a52b4cbaf96b7c85dc0dd9029599b694f056efe",
 		),
 		ContractName.fromString("security_sft_single"),
 		initRequestSchemaBase64,

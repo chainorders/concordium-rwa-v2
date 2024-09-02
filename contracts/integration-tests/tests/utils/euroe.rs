@@ -1,6 +1,8 @@
 #![allow(unused)]
 
-use concordium_cis2::{TokenAmountU64, TokenIdUnit, UpdateOperator, UpdateOperatorParams};
+use concordium_cis2::{
+    BalanceOfQueryResponse, TokenAmountU64, TokenIdUnit, UpdateOperator, UpdateOperatorParams,
+};
 use concordium_smart_contract_testing::*;
 use concordium_std::{Deserial, SchemaType, Serial, Serialize};
 
@@ -109,6 +111,15 @@ pub fn transfer_single(
         .expect("euro transfer single")
 }
 
+pub fn balance_of(
+    chain: &mut Chain,
+    sender: &Account,
+    contract: ContractAddress,
+    payload: &concordium_cis2::BalanceOfQueryParams<TokenIdUnit>,
+) -> Result<BalanceOfQueryResponse<TokenAmountU64>, ContractInvokeError> {
+    cis2::balance_of(chain, sender, contract, CONTRACT_NAME, payload)
+}
+
 pub fn balance_of_single(
     chain: &mut Chain,
     invoker: &Account,
@@ -132,7 +143,7 @@ pub fn update_operator(
     contract: ContractAddress,
     payload: &UpdateOperatorParams,
 ) -> ContractInvokeSuccess {
-    cis2::update_operator(chain, sender, contract, CONTRACT_NAME, payload)
+    cis2::update_operator(chain, sender, contract, CONTRACT_NAME, payload).expect("update operator")
 }
 
 pub fn update_operator_single(

@@ -4,7 +4,7 @@ use concordium_cis2::{
     TokenAmountU64, TokenIdVec, TokenMetadataEvent, Transfer,
 };
 use concordium_protocols::concordium_cis2_ext::{cis2_client, IsTokenAmount, PlusSubOne};
-use concordium_rwa_utils::conversions::exchange_rate::Rate;
+use concordium_protocols::rate::Rate;
 use concordium_rwa_utils::conversions::to_additional_data;
 use concordium_std::ops::{Sub, SubAssign};
 use concordium_std::*;

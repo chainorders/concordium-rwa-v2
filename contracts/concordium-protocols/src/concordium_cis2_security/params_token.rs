@@ -14,8 +14,13 @@ pub struct MintParams<T: IsTokenId, A: IsTokenAmount> {
 }
 
 #[derive(Serialize, SchemaType)]
+pub struct PauseParam<T: IsTokenId> {
+    pub token_id: T,
+}
+
+#[derive(Serialize, SchemaType)]
 pub struct PauseParams<T: IsTokenId> {
-    pub tokens: Vec<T>,
+    pub tokens: Vec<PauseParam<T>>,
 }
 
 #[derive(Serialize, SchemaType, PartialEq, Debug)]

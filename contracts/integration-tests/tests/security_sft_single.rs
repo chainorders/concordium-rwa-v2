@@ -252,7 +252,7 @@ fn burn() {
         &admin,
         token_contract,
         &concordium_protocols::concordium_cis2_security::PauseParams {
-            tokens: vec![TOKEN_ID],
+            tokens: vec![PauseParam { token_id: TOKEN_ID }],
         },
     )
     .expect("should pause");
@@ -489,7 +489,7 @@ fn forced_burn() {
     .expect_err("burned more than minted");
 
     security_sft_single_client::pause(&mut chain, &admin, token_contract, &PauseParams {
-        tokens: vec![TOKEN_ID],
+        tokens: vec![PauseParam { token_id: TOKEN_ID }],
     })
     .expect("should pause");
 }
@@ -602,7 +602,7 @@ fn transfer() {
         &admin,
         token_contract,
         &concordium_protocols::concordium_cis2_security::PauseParams {
-            tokens: vec![TOKEN_ID],
+            tokens: vec![PauseParam { token_id: TOKEN_ID }],
         },
     )
     .expect("should pause");
@@ -851,7 +851,7 @@ fn forced_transfer() {
     );
 
     security_sft_single_client::pause(&mut chain, &admin, token_contract, &PauseParams {
-        tokens: vec![TOKEN_ID],
+        tokens: vec![PauseParam { token_id: TOKEN_ID }],
     })
     .expect("should pause");
     security_sft_single_client::forced_transfer_single(

@@ -1,5 +1,5 @@
 {
-	"name": "concordium-rwa-market",
+	"name": "concordium-security-mint-fund",
 	"version": "0.1.0",
 	"scripts": {
 		"format": "cargo +nightly-2023-04-01 fmt",

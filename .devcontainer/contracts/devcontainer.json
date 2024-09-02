@@ -1,6 +1,11 @@
 {
 	"name": "contracts",
 	"dockerFile": "Dockerfile",
+	"build": {
+		"args": {
+			"VARIANT": "bookworm" // use bullseye for apple silicon
+		}
+	},
 	"context": ".",
 	"postCreateCommand": "/bootstrap.sh",
 	"postStartCommand": "yarn run",
@@ -11,7 +16,7 @@
 			"type": "volume"
 		},
 		{
-			"source": "${localEnv:HOME}/etc/concordium/default_account.export",
+			"source": "${localWorkspaceFolder}/.devcontainer/contracts/default_account.export",
 			"target": "/etc/concordium/default_account.export",
 			"type": "bind"
 		}
@@ -64,9 +69,10 @@
 					"concordium-protocols/Cargo.toml",
 					"identity-registry/Cargo.toml",
 					"integration-tests/Cargo.toml",
-					"market/Cargo.toml",
 					"security-sft-rewards/Cargo.toml",
 					"security-sft-single/Cargo.toml",
+					"security-p2p-trading/Cargo.toml",
+					"security-mint-fund/Cargo.toml",
 					"utils/Cargo.toml"
 				]
 			},

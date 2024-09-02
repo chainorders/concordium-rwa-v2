@@ -5,7 +5,8 @@ pub mod cis2_security_rewards;
 pub mod compliance;
 pub mod euroe;
 pub mod identity_registry;
-pub mod market;
+pub mod security_mint_fund_client;
+pub mod security_p2p_trading_client;
 pub mod security_sft_rewards_client;
 pub mod security_sft_single_client;
 

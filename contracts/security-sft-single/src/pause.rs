@@ -36,7 +36,7 @@ pub fn pause(
     ensure!(is_authorized, Error::Unauthorized);
 
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
-    for token_id in tokens {
+    for PauseParam { token_id } in tokens {
         state.token.pause();
         logger.log(&Event::Paused(Paused { token_id }))?;
     }
@@ -75,7 +75,7 @@ pub fn un_pause(
     ensure!(is_authorized, Error::Unauthorized);
 
     let PauseParams { tokens }: PauseParams = ctx.parameter_cursor().get()?;
-    for token_id in tokens {
+    for PauseParam { token_id } in tokens {
         state.token.un_pause();
         logger.log(&Event::UnPaused(Paused { token_id }))?;
     }

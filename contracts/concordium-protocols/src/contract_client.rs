@@ -4,6 +4,7 @@ use concordium_cis2::{
 use concordium_std::*;
 
 /// Errors which can be returned by the any Concordium Contract.
+/// This cannot implement `Serialize` because `CallContractError` is not `Serialize`.
 #[derive(Debug)]
 pub enum ContractClientError<T> {
     /// Invoking the contract returned the given error.
@@ -57,7 +58,7 @@ impl<E: Deserial, R: Read> TryFrom<CallContractError<R>> for ContractClientError
     }
 }
 
-#[inline(always)]
+#[inline]
 pub fn supports<State: Serial+DeserialWithState<ExternStateApi>>(
     host: &Host<State>,
     contract: &ContractAddress,
@@ -92,7 +93,7 @@ pub fn supports<State: Serial+DeserialWithState<ExternStateApi>>(
     }
 }
 
-#[inline(always)]
+#[inline]
 pub fn invoke_contract_read_only<
     State: Serial+DeserialWithState<ExternStateApi>,
     P: Serial,
@@ -124,6 +125,7 @@ pub fn invoke_contract_read_only<
     }
 }
 
+#[inline]
 pub fn invoke_contract<State: Serial+DeserialWithState<ExternStateApi>, P: Serial, R: Deserial>(
     host: &mut Host<State>,
     contract: &ContractAddress,

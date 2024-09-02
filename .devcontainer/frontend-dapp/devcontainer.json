@@ -1,7 +1,10 @@
 {
     "name": "frontend-dapp",
+    "dockerFile": "Dockerfile",
     "build": {
-        "dockerfile": "Dockerfile"
+        "args": {
+            "VARIANT": "bookworm" // use bullseye for apple silicon
+        }
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
     "workspaceFolder": "/workspace/frontend-dapp",

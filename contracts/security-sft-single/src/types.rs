@@ -55,6 +55,7 @@ pub type Burn = concordium_cis2_security::Burn<TokenId, TokenAmount>;
 pub type FreezeParams = concordium_cis2_security::FreezeParams<TokenId, TokenAmount>;
 pub type TransferParams = concordium_cis2::TransferParams<TokenId, TokenAmount>;
 pub type PauseParams = concordium_cis2_security::PauseParams<TokenId>;
+pub type PauseParam = concordium_cis2_security::PauseParam<TokenId>;
 pub type IsPausedResponse = concordium_cis2_security::IsPausedResponse;
 pub type BalanceOfQueryParams = concordium_cis2::BalanceOfQueryParams<TokenId>;
 pub type BalanceOfQueryResponse = concordium_cis2::BalanceOfQueryResponse<TokenAmount>;

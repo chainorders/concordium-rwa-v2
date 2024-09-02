@@ -605,16 +605,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "concordium-rwa-market"
-version = "0.1.0"
-dependencies = [
- "concordium-cis2",
- "concordium-protocols",
- "concordium-rwa-utils",
- "concordium-std",
-]
-
-[[package]]
 name = "concordium-rwa-utils"
 version = "0.1.0"
 dependencies = [
@@ -1384,10 +1374,11 @@ dependencies = [
  "concordium-protocols",
  "concordium-rwa-compliance",
  "concordium-rwa-identity-registry",
- "concordium-rwa-market",
  "concordium-smart-contract-testing",
  "concordium-std",
  "rand_core",
+ "security-mint-fund",
+ "security-p2p-trading",
  "security-sft-rewards",
  "security-sft-single",
 ]
@@ -2009,6 +2000,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "152e20a0fd0519390fc43ab404663af8a0b794273d2a91d60ad4a39f13ffe110"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "security-mint-fund"
+version = "0.1.0"
+dependencies = [
+ "concordium-cis2",
+ "concordium-protocols",
+ "concordium-rwa-utils",
+ "concordium-std",
+]
+
+[[package]]
+name = "security-p2p-trading"
+version = "0.1.0"
+dependencies = [
+ "concordium-cis2",
+ "concordium-protocols",
+ "concordium-rwa-utils",
+ "concordium-std",
 ]
 
 [[package]]

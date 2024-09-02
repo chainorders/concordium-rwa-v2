@@ -1,6 +1,6 @@
 use concordium_cis2::{IsTokenId, TokenAmountU64, TokenIdVec};
 use concordium_protocols::concordium_cis2_ext::{IsTokenAmount, PlusSubOne};
-use concordium_rwa_utils::conversions::exchange_rate::Rate;
+use concordium_protocols::rate::Rate;
 use concordium_std::ops::{Add, AddAssign, Sub, SubAssign};
 use concordium_std::{
     ensure, Address, ContractAddress, Deletable, Deserial, DeserialWithState, HasStateApi,
